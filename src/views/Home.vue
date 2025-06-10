@@ -1,12 +1,10 @@
-<template>Add commentMore actions
+<template>
     <div class="home-container" :class="{ 'dark-mode': isDarkMode }">
         <div class="header">
             <h2 class="neon-title" data-text="域名管理系统(Domains-Support)">域名管理系统(Domains-Support)</h2>
             <div class="header-buttons">
                 <el-button type="primary" size="small" :icon="Refresh" :loading="refreshing"
                     @click="handleRefresh">刷新</el-button>
-
-
                 <el-dropdown trigger="click">
                     <el-button type="primary" size="small">
                         系统
@@ -37,26 +35,6 @@
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 <el-tooltip content="登出系统" placement="bottom">
                     <el-button type="primary" size="small" :icon="SwitchButton" @click="handleLogout">登出</el-button>
                 </el-tooltip>
@@ -131,50 +109,6 @@
                                     d="M941.3 296.1c-10.3-38.6-40.7-69-79.3-79.3C792.2 198 512 198 512 198s-280.2 0-350 18.7c-38.6 10.3-69 40.7-79.3 79.3C64 365.9 64 512 64 512s0 146.1 18.7 215.9c10.3 38.6 40.7 69 79.3 79.3C231.8 826 512 826 512 826s280.2 0 350-18.7c38.6-10.3 69-40.7 79.3-79.3C960 658.1 960 512 960 512s0-146.1-18.7-215.9zM423 646V378l232 134-232 134z" />
                             </svg></el-icon>
                     </a>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </div>
             </div>
         </div>
@@ -182,7 +116,6 @@
 </div>
 Use code with caution.
 </template>
-
 <script setup lang="ts">
 // All your Javascript code from before remains unchanged.
 // Just copy and paste it here.
@@ -224,9 +157,6 @@ const editData = ref<Domain>()
 const importVisible = ref(false)
 
 const isDarkMode = ref(localStorage.getItem('darkMode') === 'true')
-
-
-
 
 const checkLoginStatus = () => {
     const token = auth.getAuthToken()
@@ -303,8 +233,6 @@ const loadDomains = async () => {
             headers: {
                 'Authorization': `Bearer ${authData.token}`,
                 'Content-Type': 'application/json'
-
-
             }
         })
         console.log('域名列表原始响应:', response)
@@ -390,9 +318,6 @@ const handleConfigSubmit = async (config: AlertConfig) => {
         } else {
             ElMessage.error('保存配置失败')
         }
-
-
-
     }
 }
 
@@ -401,10 +326,6 @@ const updateDomainStatus = async (domain: string, status: string): Promise<Domai
         const authData = auth.getAuthToken()
         if (!authData) {
             throw new Error('未登录或登录已过期')
-
-
-
-
         }
 
         const response = await fetch('/api/domains/status', {
@@ -467,13 +388,6 @@ const checkDomainStatus = async (domain: string): Promise<string> => {
     }
 }
 
-
-
-
-
-
-
-
 const handleRefresh = async () => {
     if (refreshing.value) return
 
@@ -493,8 +407,6 @@ const handleRefresh = async () => {
     } catch (error: unknown) {
         console.error('刷新状态失败:', error)
         ElMessage.error(error instanceof Error ? error.message : '刷新状态失败')
-
-
     } finally {
         refreshing.value = false
     }
@@ -593,15 +505,17 @@ onMounted(() => {
     loadDomains()
     loadAlertConfig()
 })
-
-
-
 </script>
-
 <style>
 /* 全局样式 */
 .neon-title {
-@@ -365,7 +519,7 @@ onMounted(() => {
+    font-family: 'ZCOOL KuaiLe', cursive;
+    font-weight: normal;
+    font-size: 2.2rem;
+    position: relative;
+    background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     animation: gradientFlow 5s linear infinite;
@@ -609,7 +523,8 @@ onMounted(() => {
 }
 
 @keyframes gradientFlow {
-@@ -374,144 +528,102 @@ onMounted(() => {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
@@ -624,7 +539,6 @@ onMounted(() => {
     --el-bg-color-overlay: transparent;
 }
 </style>
-
 <style scoped>
 /* --- 背景和布局 --- */
 .home-container {
@@ -637,26 +551,9 @@ onMounted(() => {
     background-position: center center;
     background-attachment: fixed;
     transition: background-image 0.5s ease-in-out;
-
-
-
 }
 .home-container.dark-mode {
     background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 /* --- 透明磨砂玻璃面板效果 --- */
@@ -672,13 +569,9 @@ onMounted(() => {
     border-radius: 12px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     margin-bottom: 20px; /* 统一间距 */
-
-
-
 }
 .dark-mode .header, .dark-mode .custom-table, .dark-mode .footer {
     background-color: rgba(0, 0, 0, 0.6);
-
 }
 
 /* --- 元素样式调整 --- */
@@ -689,19 +582,7 @@ onMounted(() => {
 .header h2 { margin: 0; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-
-
-
-
-
 /* 表格透明化 */
-
-
-
-
-
-
-
 :deep(.el-table),
 :deep(.el-table__expanded-cell) {
     background-color: transparent !important;
@@ -710,36 +591,21 @@ onMounted(() => {
 :deep(.el-table tr),
 :deep(.el-table td) {
     background-color: transparent !important;
-
-
-
-
     color: #fff !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
     text-shadow: 0 0 4px #000, 0 0 4px #000;
-
-
-
-
-
-
 }
 :deep(.el-table__row:hover td) {
     background-color: rgba(255, 255, 255, 0.15) !important;
-
-
-
 }
 
 /* 链接和状态文本 */
 .link { color: #90caf9; text-decoration: none; font-weight: bold; }
 .link:hover { color: #e3f2fd; }
 
-
 .warning-text { color: #ffd54f; font-weight: bold; }
 .success-text { color: #a5d6a7; font-weight: bold; }
 .danger-text { color: #ef9a9a; font-weight: bold; }
-
 
 /* --- 页脚样式 --- */
 .footer {
@@ -752,10 +618,6 @@ onMounted(() => {
     border-radius: 0; /* 页脚通常是直角 */
     color: #eee;
     text-shadow: 0 0 3px #000;
-
-
-
-
 }
 .footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; text-align: center; }
 .copyright { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 14px; }
