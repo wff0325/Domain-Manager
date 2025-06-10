@@ -103,7 +103,6 @@
         <footer class="footer">
             <div class="footer-content">
                  <span>© 2025 Domains-Support v1.0.5</span>
-                 <!-- ... other footer content -->
             </div>
         </footer>
     </div>
@@ -125,7 +124,7 @@ interface ApiResponse<T = any> { status: number; message: string; data: T; }
 
 const settingsDrawerVisible = ref(false);
 const theme = ref(localStorage.getItem('theme') || 'system');
-const accentColor = ref(localStorage.getItem('accentColor') || '#409EFF');
+const accentColor = ref(localStorage.getItem('accentColor') || '#409EFF'); // Default Element Plus blue
 const panelStyle = ref(localStorage.getItem('panelStyle') || 'misty');
 const isDarkMode = ref(false);
 
@@ -136,13 +135,17 @@ watch(accentColor, (newColor) => localStorage.setItem('accentColor', newColor));
 watch(panelStyle, (newStyle) => localStorage.setItem('panelStyle', newStyle));
 
 const applySettings = () => {
+    let currentIsDark = false;
     if (theme.value === 'system') {
-        isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        currentIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     } else {
-        isDarkMode.value = theme.value === 'dark';
+        currentIsDark = theme.value === 'dark';
     }
-    // Apply class to the root <html> element
-    document.documentElement.className = isDarkMode.value ? 'dark' : '';
+    isDarkMode.value = currentIsDark; // Update reactive variable
+    
+    // Apply class to the root <html> element for global styles (like Element Plus dark mode)
+    document.documentElement.className = currentIsDark ? 'dark' : '';
+    // Apply accent color using CSS variable
     document.documentElement.style.setProperty('--el-color-primary', accentColor.value);
 };
 
@@ -150,13 +153,16 @@ const setAccentColor = (color: string) => { accentColor.value = color; };
 const panelStyleClass = computed(() => `panel-style-${panelStyle.value}`);
 
 onMounted(() => {
-    applySettings();
+    applySettings(); // Apply on initial load
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         if (theme.value === 'system') applySettings();
     });
 });
+// Watch for direct changes to theme or accentColor and re-apply
 watch([theme, accentColor], applySettings, { immediate: true });
 
+
+// --- Standard Component Logic (No changes needed here from previous correct version) ---
 const router = useRouter();
 const auth = useAuth();
 const domains = ref<DomainData[]>([]);
@@ -266,9 +272,9 @@ const handleRefresh = async () => {
             if (result.status === 200 && result.data) return result.data;
             throw new Error(result.message || '更新失败');
         };
-        const updatedDomains = await Promise.all(domains.value.map(async (domain) => {
-            const status = await checkDomainStatus(domain.domain);
-            return await updateDomainStatus(domain.domain, status);
+        const updatedDomains = await Promise.all(domains.value.map(async (domainItem) => { // Renamed 'domain' to 'domainItem' to avoid conflict
+            const status = await checkDomainStatus(domainItem.domain);
+            return await updateDomainStatus(domainItem.domain, status);
         }));
         domains.value = updatedDomains;
         ElMessage.success('状态刷新完成');
@@ -326,7 +332,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* --- 1. Background Styling (FIXED) --- */
+/* --- Base Container Styling --- */
 .home-container {
     min-height: 100vh;
     box-sizing: border-box;
@@ -334,102 +340,129 @@ onMounted(() => {
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
-    transition: background-image 0.5s ease-in-out;
-}
-/* Fallback color + background image for light mode */
-.home-container.light {
-    background-color: #f0f2f5;
-    background-image: url('https://images.unsplash.com/photo-1489549132488-d00b7d881cb6');
-}
-/* Fallback color + background image for dark mode */
-.home-container.dark {
-    background-color: #141414;
-    background-image: url('https://images.unsplash.com/photo-1533119428433-b27b858f523a');
+    transition: background-image 0.4s ease-in-out, background-color 0.4s ease-in-out;
 }
 
-/* --- 2. Panel Styling --- */
+/* --- Light Mode Specific --- */
+.home-container.light {
+    background-color: #e0eafc; /* Fallback light color */
+    /* A light, subtle abstract background or a nature scene would work well. Using a placeholder for now. */
+    background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80');
+}
+
+/* --- Dark Mode Specific --- */
+.home-container.dark {
+    background-color: #0d1b2a; /* Fallback dark color */
+    background-image: url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80');
+}
+
+
+/* --- Panel Base Styling --- */
 .header, .custom-table, .footer {
     position: relative;
     z-index: 10;
     border-radius: 12px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     margin-bottom: 20px;
-    transition: background-color 0.3s, backdrop-filter 0.3s;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out, border-color 0.3s ease-in-out;
+    border: 1px solid transparent; /* Start with transparent border */
 }
-/* Misty Style */
+
+/* --- Misty Panel Style --- */
 .panel-style-misty .header, .panel-style-misty .custom-table, .panel-style-misty .footer {
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 .light .panel-style-misty .header, .light .panel-style-misty .custom-table, .light .panel-style-misty .footer {
-    background-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.7);
+    border-color: rgba(200, 200, 200, 0.3);
 }
 .dark .panel-style-misty .header, .dark .panel-style-misty .custom-table, .dark .panel-style-misty .footer {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(20, 20, 30, 0.6);
+    border-color: rgba(100, 100, 120, 0.4);
 }
-/* Solid Style */
+
+/* --- Solid Panel Style --- */
 .panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer {
     backdrop-filter: none;
 }
 .light .panel-style-solid .header, .light .panel-style-solid .custom-table, .light .panel-style-solid .footer {
-    background-color: #ffffff;
+    background-color: #f8f9fa; /* Slightly off-white for solid light panels */
+    border-color: #dee2e6;
 }
 .dark .panel-style-solid .header, .dark .panel-style-solid .custom-table, .dark .panel-style-solid .footer {
-    background-color: #212121;
+    background-color: #1f2937; /* Dark grey for solid dark panels */
+    border-color: #374151;
 }
 
-/* --- 3. Table Text Color (FIXED) --- */
+
+/* --- Table Specific Styling (Adaptive Text Color - FIXED) --- */
 :deep(.el-table), :deep(.el-table__expanded-cell) {
     background-color: transparent !important;
 }
-/* Base styles for all table cells */
 :deep(.el-table th), :deep(.el-table tr), :deep(.el-table td) {
     background-color: transparent !important;
-    text-shadow: none;
+    text-shadow: none !important; /* Remove any text shadow for clarity */
+    transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
-/* Light mode text colors */
+
+/* Light theme table text and borders */
 .light :deep(.el-table th), .light :deep(.el-table tr), .light :deep(.el-table td) {
-    color: #303133 !important;
-    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: #343a40 !important; /* Darker grey for light theme text */
+    border-color: rgba(0, 0, 0, 0.08) !important;
 }
-/* Dark mode text colors */
+/* Dark theme table text and borders */
 .dark :deep(.el-table th), .dark :deep(.el-table tr), .dark :deep(.el-table td) {
-    color: #E5EAF3 !important;
-    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #e9ecef !important; /* Light grey for dark theme text */
+    border-color: rgba(255, 255, 255, 0.12) !important;
 }
 /* Row hover effect */
-:deep(.el-table__row:hover td) {
-    background-color: rgba(0, 0, 0, 0.05) !important;
+.light :deep(.el-table__row:hover td) {
+    background-color: rgba(0, 0, 0, 0.04) !important;
 }
 .dark :deep(.el-table__row:hover td) {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
 }
 
-/* --- 4. Other Element Styles --- */
-.header { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 5px 20px; }
+
+/* --- Header & Buttons --- */
+.header { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 10px 20px; } /* Increased padding */
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-/* Status and Link colors */
-.link { color: var(--el-color-primary); text-decoration: none; font-weight: bold; }
-.link:hover { opacity: 0.8; }
-.warning-text { color: #E6A23C !important; font-weight: bold; }
-.dark .warning-text { color: #ffd54f !important; }
-.success-text { color: #67C23A; font-weight: bold; }
-.dark .success-text { color: #a5d6a7; }
-.danger-text { color: #F56C6C; font-weight: bold; }
-.dark .danger-text { color: #ef9a9a; }
+/* --- Text & Link Colors --- */
+.link { color: var(--el-color-primary); text-decoration: none; font-weight: 500; } /* Adjusted font-weight */
+.link:hover { opacity: 0.75; }
 
-/* Footer */
-.footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 10px; margin: 0; border-radius: 0; }
-.light .footer { color: #303133; }
-.dark .footer { color: #E5EAF3; }
-.footer-content { display: flex; justify-content: center; }
+.warning-text { color: #fd7e14 !important; font-weight: 500; } /* Bootstrap orange */
+.dark .warning-text { color: #ffc107 !important; } /* Bootstrap warning yellow for dark */
 
-/* Settings Drawer */
-.settings-container { padding: 0 10px; }
-.settings-group { display: flex; justify-content: center; width: 100%; margin-top: 10px; }
-.color-picker { display: flex; justify-content: space-evenly; padding: 10px 0; }
-.color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
-.color-swatch:hover { transform: scale(1.1); }
-.color-swatch.active { border-color: var(--el-color-primary); transform: scale(1.2); }
+.success-text { color: #198754; font-weight: 500; } /* Bootstrap success green */
+.dark .success-text { color: #20c997; } /* Lighter green for dark */
+
+.danger-text { color: #dc3545; font-weight: 500; } /* Bootstrap danger red */
+.dark .danger-text { color: #fd7e14; } /* Orange-red for dark */
+
+
+/* --- Footer Styling --- */
+.footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px; margin: 0; border-radius: 0; }
+.light .footer { color: #495057; }
+.dark .footer { color: #adb5bd; }
+.footer-content { display: flex; justify-content: center; font-size: 0.9em; }
+
+/* --- Settings Drawer --- */
+.settings-container { padding: 0 15px; }
+.settings-group { display: flex; justify-content: center; width: 100%; margin-top: 12px; margin-bottom: 12px; }
+.color-picker { display: flex; justify-content: space-around; padding: 15px 0; }
+.color-swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
+.color-swatch:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+.color-swatch.active { border-color: var(--el-color-primary); transform: translateY(-1px) scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+/* Neon Title (Keep as is - it's a distinct element) */
+.neon-title {
+    font-family: 'ZCOOL KuaiLe', cursive; font-weight: normal; font-size: 2.2rem; position: relative;
+    background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    background-size: 400% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: gradientFlow 5s linear infinite; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+@keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 </style>
