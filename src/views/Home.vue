@@ -47,17 +47,29 @@
                     <a :href="scope.row.registrar_link" target="_blank" class="link">{{ scope.row.registrar }}</a>
                 </template>
             </el-table-column>
-            <el-table-column prop="registrar_date" label="注册时间" align="center" sortable />
-            <el-table-column prop="expiry_date" label="过期时间" align="center" sortable />
+            <el-table-column prop="registrar_date" label="注册时间" align="center" sortable>
+                <template #default="scope">
+                    <span class="accent-text">{{ scope.row.registrar_date }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="expiry_date" label="过期时间" align="center" sortable>
+                <template #default="scope">
+                    <span class="accent-text">{{ scope.row.expiry_date }}</span>
+                </template>
+            </el-table-column>
             <el-table-column label="剩余时间" align="center" sortable
                 :sort-method="(a, b) => calculateRemainingDays(a.expiry_date) - calculateRemainingDays(b.expiry_date)">
                 <template #default="scope">
-                    <span :class="{ 'warning-text': calculateRemainingDays(scope.row.expiry_date) <= alertDays }">
+                    <span :class="calculateRemainingDays(scope.row.expiry_date) <= alertDays ? 'warning-text' : 'accent-text'">
                         {{ calculateRemainingDays(scope.row.expiry_date) }}天
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column prop="service_type" label="服务类型" align="center" sortable />
+            <el-table-column prop="service_type" label="服务类型" align="center" sortable>
+                 <template #default="scope">
+                    <span class="accent-text">{{ scope.row.service_type }}</span>
+                </template>
+            </el-table-column>
             <el-table-column prop="status" label="状态" align="center" sortable>
                 <template #default="scope">
                     <span :class="scope.row.status === '在线' ? 'success-text' : 'danger-text'">
@@ -65,7 +77,11 @@
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column prop="memo" label="备注" align="center" sortable />
+            <el-table-column prop="memo" label="备注" align="center" sortable>
+                <template #default="scope">
+                    <span class="accent-text">{{ scope.row.memo }}</span>
+                </template>
+            </el-table-column>
             <el-table-column label="操作" width="200" align="center">
                 <template #default="scope">
                     <el-button type="primary" size="small" :icon="Edit" @click="handleEdit(scope.row)">修改</el-button>
@@ -429,6 +445,7 @@ html.dark :deep(.el-table__row:hover td) { background-color: rgba(255, 255, 255,
 /* --- 文字和链接颜色 --- */
 .link { color: var(--el-color-primary); text-decoration: none; font-weight: 500; }
 .link:hover { opacity: 0.8; }
+.accent-text { color: var(--el-color-primary); font-weight: 500; }
 html.light .warning-text { color: #e67e22 !important; font-weight: 500; }
 html.dark .warning-text { color: #f39c12 !important; font-weight: 500; }
 html.light .success-text { color: #27ae60; font-weight: 500; }
