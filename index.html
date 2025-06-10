@@ -6,11 +6,56 @@
   <link rel="icon" type="image/svg+xml" href="public/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Domains-Support</title>
+
+  <!-- 新增的字体链接 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+  
 </head>
 
 <body>
+  <!-- Vue应用的挂载点 -->
   <div id="app"></div>
+  
+  <!-- 这是您应用的主脚本，必须保留 -->
   <script type="module" src="/src/main.ts"></script>
+
+  <!-- --- 新增的特效和宠物 --- -->
+  
+  <!-- 1. Live2D 桌面宠物的容器 -->
+  <div id="live2d-widget"></div>
+
+  <!-- 2. 页面特效脚本 (爱心、樱花、小星星) -->
+  <script src="https://testingcf.jsdelivr.net/gh/mocchen/cssmeihua/js/aixin.js"></script>
+  <script src="https://testingcf.jsdelivr.net/gh/mocchen/cssmeihua/js/yinghua.js"></script>
+  <script src="https://testingcf.jsdelivr.net/gh/mocchen/cssmeihua/js/xiaoxingxing.js"></script>
+  
+  <!-- 3. Live2D 桌面宠物脚本 -->
+  <script src="https://cdn.jsdelivr.net/npm/live2d-widget@3.1.4/lib/L2Dwidget.min.js"></script>
+  <script type="text/javascript">
+      L2Dwidget.init({
+          "model": {
+              // 您可以从这里找到更多模型: https://github.com/stevenjoezhang/live2d-widget-models
+              jsonPath: "https://cdn.jsdelivr.net/npm/live2d-widget-model-shizuku@1.0.5/assets/shizuku.model.json", 
+              "scale": 1
+          },
+          "display": {
+              "position": "left", // 位置：left / right
+              "width": 200,
+              "height": 400,
+              "hOffset": 10,
+              "vOffset": -20
+          },
+          "mobile": {
+              "show": true, // 移动端是否显示
+              "scale": 0.5
+          },
+          "react": { "opacityDefault": 0.85, "opacityOnHover": 1 }
+      });
+  </script>
+  <!-- --- 新增部分结束 --- -->
+
 </body>
 
 </html>
