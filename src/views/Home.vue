@@ -6,7 +6,6 @@
                 <el-button type="primary" size="small" :icon="Refresh" :loading="refreshing"
                     @click="handleRefresh">刷新</el-button>
                 
-                <!-- 其他系统操作按钮 -->
                 <el-dropdown trigger="click">
                     <el-button type="primary" size="small">
                         系统
@@ -22,7 +21,6 @@
                     </template>
                 </el-dropdown>
                 
-                <!-- 全新的主题切换器 -->
                 <el-dropdown trigger="click" @command="setTheme">
                     <el-button type="primary" size="small">
                         <el-icon>
@@ -122,10 +120,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue' // <-- 引入 computed
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-// <-- 引入 Monitor 图标
 import { Setting, Refresh, Plus, Edit, Delete, SwitchButton, Sunny, Moon, ArrowDown, Upload, Download, Monitor } from '@element-plus/icons-vue' 
 import { useAuth } from '../utils/auth'
 import DomainDialog from '../components/DomainDialog.vue'
@@ -133,193 +130,269 @@ import AlertConfigDialog from '../components/AlertConfigDialog.vue'
 import ImportDialog from '../components/ImportDialog.vue'
 import { createDomain, updateDomain, deleteDomain, type DomainData } from '../api/domains'
 
-type Domain = DomainData
-type Theme = 'light' | 'dark' | 'system'
+// --- 类型定义 ---
+type Domain = DomainData;
+type Theme = 'light' | 'dark' | 'system';
 
-// --- 全新的主题管理逻辑 ---
-const theme = ref<Theme>((localStorage.getItem('theme') as Theme) || 'system')
+interface AlertConfig {
+    tg_token: string;
+    tg_userid: string;
+    days: number;
+}
 
-// 计算属性，用于决定当前是否应该应用暗黑模式的 class
+interface ApiSuccessResponse<T> {
+    status: 200;
+    message: string;
+    data: T;
+}
+
+interface ApiErrorResponse {
+    status: number;
+    message: string;
+    data: null;
+}
+
+type GenericApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
+
+// --- 主题管理 ---
+const theme = ref<Theme>((localStorage.getItem('theme') as Theme) || 'system');
+
 const effectiveDarkMode = computed(() => {
     if (theme.value === 'system') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
-    return theme.value === 'dark'
-})
+    return theme.value === 'dark';
+});
 
-// 应用主题的核心函数
 const applyTheme = (isDark: boolean) => {
-    if (isDark) {
-        document.documentElement.classList.add('dark')
-    } else {
-        document.documentElement.classList.remove('dark')
-    }
-}
+    document.documentElement.classList.toggle('dark', isDark);
+};
 
-// 设置新主题的函数
 const setTheme = (newTheme: Theme) => {
-    theme.value = newTheme
-    localStorage.setItem('theme', newTheme)
-    applyTheme(effectiveDarkMode.value)
-}
+    if(!newTheme) return;
+    theme.value = newTheme;
+    localStorage.setItem('theme', newTheme);
+    applyTheme(effectiveDarkMode.value);
+};
 
-// --- 原有的其他 script setup 代码 ---
-const router = useRouter()
-const auth = useAuth()
-const domains = ref<Domain[]>([])
-const alertDays = ref(30)
-// ... 其他所有未改动的 ref 和函数都保持原样 ...
-const alertConfig = ref<AlertConfig>()
-const refreshing = ref(false)
-const dialogVisible = ref(false)
-const configVisible = ref(false)
-const isEdit = ref(false)
-const editData = ref<Domain>()
-const importVisible = ref(false)
-interface AlertConfig {
-    tg_token: string
-    tg_userid: string
-    days: number
-}
-interface ApiResponse<T = any> {
-    status: number
-    message: string
-    data: T
-}
+// --- 响应式状态 ---
+const router = useRouter();
+const auth = useAuth();
+const domains = ref<Domain[]>([]);
+const alertDays = ref(30);
+const alertConfig = ref<AlertConfig | undefined>();
+const refreshing = ref(false);
+const dialogVisible = ref(false);
+const configVisible = ref(false);
+const isEdit = ref(false);
+const editData = ref<Domain | undefined>();
+const importVisible = ref(false);
+
+// --- 函数 ---
 const checkLoginStatus = () => {
-    const token = auth.getAuthToken()
+    const token = auth.getAuthToken();
     if (!token) {
-        router.push({ name: 'Login' })
+        router.push({ name: 'Login' });
     }
-}
+};
+
 const handleLogout = () => {
-    auth.clearAuth()
-    router.push({ name: 'Login' })
-}
+    auth.clearAuth();
+    router.push({ name: 'Login' });
+};
+
 const handleAdd = () => {
-    isEdit.value = false
-    editData.value = undefined
-    dialogVisible.value = true
-}
+    isEdit.value = false;
+    editData.value = undefined;
+    dialogVisible.value = true;
+};
+
 const handleEdit = (row: Domain) => {
-    isEdit.value = true
-    editData.value = row
-    dialogVisible.value = true
-}
+    isEdit.value = true;
+    editData.value = { ...row };
+    dialogVisible.value = true;
+};
+
 const handleDelete = async (row: Domain) => {
     try {
-        await ElMessageBox.confirm('确定要删除该域名吗？', '提示', {
-            type: 'warning'
-        })
+        await ElMessageBox.confirm('确定要删除该域名吗？', '提示', { type: 'warning' });
         if (row.id) {
-            await deleteDomain(row.id)
-            ElMessage.success('删除成功')
-            await loadDomains()
+            await deleteDomain(row.id);
+            ElMessage.success('删除成功');
+            await loadDomains();
         }
     } catch (error) {
         if (error !== 'cancel') {
-            ElMessage.error('删除失败')
+            ElMessage.error('删除失败');
         }
     }
-}
+};
+
 const handleDialogSubmit = async (formData: Omit<Domain, 'id' | 'created_at'>) => {
     try {
         if (isEdit.value && editData.value?.id) {
-            await updateDomain(editData.value.id, formData)
-            ElMessage.success('修改成功')
+            await updateDomain(editData.value.id, formData);
+            ElMessage.success('修改成功');
         } else {
-            await createDomain(formData)
-            ElMessage.success('添加成功')
+            await createDomain(formData);
+            ElMessage.success('添加成功');
         }
-        dialogVisible.value = false
-        await loadDomains()
+        dialogVisible.value = false;
+        await loadDomains();
     } catch (error: any) {
-        ElMessage.error(error.response?.data?.message || (isEdit.value ? '修改失败' : '添加失败'))
+        ElMessage.error(error.response?.data?.message || (isEdit.value ? '修改失败' : '添加失败'));
     }
-}
+};
+
 const loadDomains = async () => {
     try {
-        const authData = auth.getAuthToken()
-        if (!authData) throw new Error('未登录或登录已过期')
+        const authData = auth.getAuthToken();
+        if (!authData) throw new Error('未登录或登录已过期');
         const response = await fetch('/api/domains', {
             headers: { 'Authorization': `Bearer ${authData.token}` }
-        })
-        if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.message || '请求失败')
+        });
+
+        const result: GenericApiResponse<Domain[]> = await response.json();
+
+        if (result.status !== 200) {
+            throw new Error(result.message || '请求失败');
         }
-        const result = await response.json()
-        if (result.status !== 200) throw new Error(result.message || '请求失败')
-        domains.value = result.data || []
-    } catch (error: any) {
-        ElMessage.error(error.message || '加载域名列表失败')
-        if (error.message.includes('未授权')) {
-            auth.clearAuth()
-            router.push({ name: 'Login' })
+        domains.value = result.data || [];
+    } catch (error) {
+        if (error instanceof Error) {
+            ElMessage.error(error.message);
+            if (error.message.includes('未授权')) {
+                auth.clearAuth();
+                router.push({ name: 'Login' });
+            }
+        } else {
+            ElMessage.error('加载域名列表时发生未知错误');
         }
     }
-}
+};
+
 const calculateRemainingDays = (expiryDate: string) => {
-    const today = new Date(); today.setHours(0, 0, 0, 0)
-    const expiry = new Date(expiryDate); expiry.setHours(0, 0, 0, 0)
-    const diffTime = expiry.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays < 0 ? 0 : diffDays
-}
-const handleConfig = () => { configVisible.value = true }
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const expiry = new Date(expiryDate); expiry.setHours(0, 0, 0, 0);
+    const diffTime = expiry.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays < 0 ? 0 : diffDays;
+};
+
+const handleConfig = () => { configVisible.value = true; };
+
 const handleConfigSubmit = async (config: AlertConfig) => {
     try {
-        const authData = auth.getAuthToken()
-        if (!authData) throw new Error('未登录或登录已过期')
+        const authData = auth.getAuthToken();
+        if (!authData) throw new Error('未登录或登录已过期');
         const response = await fetch('/api/alertconfig', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
             body: JSON.stringify(config)
-        })
-        const result = await response.json()
+        });
+        
+        const result: GenericApiResponse<AlertConfig> = await response.json();
+
         if (result.status === 200) {
-            ElMessage.success('配置保存成功')
-            alertDays.value = config.days
-            alertConfig.value = config
+            ElMessage.success('配置保存成功');
+            alertDays.value = config.days;
+            alertConfig.value = result.data;
         } else {
-            throw new Error(result.message || '保存失败')
+            throw new Error(result.message || '保存失败');
         }
-    } catch (error: any) {
-        ElMessage.error(error.message || '保存配置失败')
+    } catch (error) {
+        if (error instanceof Error) {
+            ElMessage.error(error.message);
+        } else {
+            ElMessage.error('保存配置失败');
+        }
+    }
+};
+
+const handleImport = () => { importVisible.value = true };
+
+const handleExport = async () => {
+    try {
+        const authData = auth.getAuthToken()
+        if (!authData) {
+            throw new Error('未登录或登录已过期')
+        }
+        const loading = ElMessage.info({ message: '正在准备导出数据...', duration: 0 })
+        const response = await fetch('/api/domains/export', { headers: { 'Authorization': `Bearer ${authData.token}` } })
+        loading.close()
+        if (!response.ok) {
+            const errorData = await response.json() as ApiErrorResponse;
+            throw new Error(errorData.message || '导出失败')
+        }
+        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `domains-export-${new Date().toISOString().split('T')[0]}.json`
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        ElMessage.success('导出成功')
+    } catch (error) {
+        if (error instanceof Error) {
+            ElMessage.error(error.message)
+        } else {
+            ElMessage.error('导出失败')
+        }
     }
 }
-const handleImport = () => { importVisible.value = true }
-const handleExport = async () => { /* ... */ } // 保持不变
-const handleRefresh = async () => { /* ... */ } // 保持不变
+
+const handleRefresh = async () => { /* 保持您原来的代码 */ }
+const loadAlertConfig = async () => { /* 保持您原来的代码 */ }
 
 onMounted(() => {
-    // 初始化时应用一次主题
-    applyTheme(effectiveDarkMode.value)
-
-    // 监听系统主题变化
+    applyTheme(effectiveDarkMode.value);
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         if (theme.value === 'system') {
-            applyTheme(effectiveDarkMode.value)
+            applyTheme(effectiveDarkMode.value);
         }
-    })
+    });
 
-    checkLoginStatus()
-    loadDomains()
-    // loadAlertConfig() // 假设这个函数也存在且不变
-})
+    checkLoginStatus();
+    loadDomains();
+    loadAlertConfig();
+});
+
 </script>
 
 <style>
 /* 全局样式 */
-.neon-title { /* ... 保持不变 ... */ }
-@keyframes gradientFlow { /* ... 保持不变 ... */ }
+.neon-title {
+    font-family: 'ZCOOL KuaiLe', cursive;
+    font-weight: normal;
+    font-size: 2.2rem;
+    position: relative;
+    background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientFlow 5s linear infinite;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
 #live2d-widget {
     z-index: 1 !important;
     pointer-events: none !important;
 }
 
-.dark { /* ... 保持不变 ... */ }
+.dark {
+    --el-bg-color: transparent !important;
+    --el-bg-color-overlay: transparent !important;
+}
 </style>
 
 <style scoped>
@@ -332,27 +405,24 @@ onMounted(() => {
     background-position: center center;
     background-attachment: fixed;
     transition: background-color 0.5s ease;
-    position: relative; /* 为遮罩层提供定位上下文 */
+    position: relative;
     color: #303133;
 }
-/* 背景遮罩层 */
 .home-container::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg'); /* 固定一张背景图 */
+    background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    z-index: -1; /* 将背景图置于最底层 */
-    transition: opacity 0.5s ease;
+    z-index: -1;
 }
-/* 颜色叠加层 */
 .home-container::after {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(255, 255, 255, 0.3); /* 日间模式的浅色遮罩 */
+    background-color: rgba(255, 255, 255, 0.3);
     z-index: -1;
     transition: background-color 0.5s ease;
 }
@@ -360,30 +430,37 @@ onMounted(() => {
     color: #E5EAF3;
 }
 .home-container.dark-mode::after {
-    background-color: rgba(0, 0, 0, 0.5); /* 夜间模式的深色遮罩 */
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
-/* --- 不透明面板，彻底解决可读性问题 --- */
+/* --- 不透明面板 --- */
 .header, .custom-table, .footer {
     position: relative;
     z-index: 10;
-    background-color: rgba(255, 255, 255, 0.6); /* 日间模式的面板背景 */
+    background-color: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
     transition: background-color 0.5s, border-color 0.5s;
 }
 .dark-mode .header, .dark-mode .custom-table, .dark-mode .footer {
-    background-color: rgba(40, 40, 40, 0.7); /* 夜间模式的面板背景 */
+    background-color: rgba(30, 30, 30, 0.75);
     border-color: rgba(255, 255, 255, 0.1);
 }
 
+/* --- 元素样式 --- */
+.header {
+    display: flex; flex-wrap: wrap; gap: 15px;
+    align-items: center; justify-content: space-between; padding: 5px 20px;
+}
+.dark-mode .header { color: #fff; }
+
 /* 表格样式 */
 .custom-table {
-    --el-table-border-color: rgba(0,0,0,0.1); /* Element Plus 变量覆盖 */
+    --el-table-border-color: rgba(0,0,0,0.1);
 }
 .dark-mode .custom-table {
     --el-table-border-color: rgba(255,255,255,0.15);
@@ -396,28 +473,37 @@ onMounted(() => {
 :deep(.el-table tr),
 :deep(.el-table td) {
     background-color: transparent !important;
-    color: inherit !important; /* 让文字颜色跟随父容器 */
+    color: inherit !important;
+}
+:deep(.el-table th) {
+    font-weight: bold;
 }
 :deep(.el-table__row:hover td) {
-    background-color: rgba(0, 0, 0, 0.05) !important;
+    background-color: rgba(0, 0, 0, 0.03) !important;
 }
 .dark-mode :deep(.el-table__row:hover td) {
     background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* 链接和状态文本 */
-.link { color: #0066cc; text-decoration: none; font-weight: bold; }
-.dark-mode .link { color: #90caf9; }
+.link { color: #0056b3; text-decoration: none; font-weight: bold; }
+.dark-mode .link { color: #8ab4f8; }
 .link:hover { text-decoration: underline; }
 
-.warning-text { color: #E6A23C; font-weight: bold; }
-.success-text { color: #67C23A; font-weight: bold; }
-.danger-text { color: #F56C6C; font-weight: bold; }
+.warning-text { color: #c85a17; font-weight: bold; }
+.dark-mode .warning-text { color: #fdd835; }
+.success-text { color: #22863a; font-weight: bold; }
+.dark-mode .success-text { color: #81c784; }
+.danger-text { color: #d73a49; font-weight: bold; }
+.dark-mode .danger-text { color: #ef9a9a; }
 
 /* 页脚 */
 .footer {
-    position: fixed; bottom: 20px; left: 20px; right: 20px;
-    margin-bottom: 0; padding: 10px;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    margin: 0; padding: 10px; border-radius: 0;
+    box-shadow: none; border: none; border-top: 1px solid rgba(0,0,0,0.05);
 }
-.footer-content { /* ... 保持不变 ... */ }
+.dark-mode .footer { border-top: 1px solid rgba(255,255,255,0.1); }
+.footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; text-align: center; }
+.copyright, .separator, .social-link { color: inherit; }
 </style>
