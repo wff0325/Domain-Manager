@@ -1,7 +1,6 @@
 <template>
     <div class="home-container" :class="{ 'dark-mode': isDarkMode }">
         <div class="header">
-            <!-- 核心改动：为 h2 添加了新的 class 和 data-text 属性 -->
             <h2 class="neon-title" data-text="域名管理系统(Domains-Support)">域名管理系统(Domains-Support)</h2>
             <div class="header-buttons">
                 <el-button type="primary" size="small" :icon="Refresh" :loading="refreshing"
@@ -150,16 +149,17 @@ const alertDays = ref(30)
 const alertConfig = ref<AlertConfig>()
 const refreshing = ref(false)
 
-// 对话框相关的状态
 const dialogVisible = ref(false)
 const configVisible = ref(false)
 const isEdit = ref(false)
 const editData = ref<Domain>()
 const importVisible = ref(false)
 
-// 暗黑模式状态
 const isDarkMode = ref(localStorage.getItem('darkMode') === 'true')
 
+// ... [The rest of your <script setup> block remains unchanged] ...
+// ... [为了简洁，我在这里省略了未改动的JS代码，请使用您原来的JS代码] ...
+// ... [HandleLogout, handleAdd, handleDelete, etc. all stay the same] ...
 const checkLoginStatus = () => {
     const token = auth.getAuthToken()
     if (!token) {
@@ -342,7 +342,6 @@ const updateDomainStatus = async (domain: string, status: string): Promise<Domai
         const result = await response.json() as ApiResponse<Domain>
 
         if (result.status === 200) {
-            //ElMessage.success('状态更新成功')
             return result.data
         } else {
             throw new Error(result.message || '更新失败')
@@ -398,14 +397,12 @@ const handleRefresh = async () => {
         refreshing.value = true
         ElMessage.info('正在检查域名状态...')
 
-        // 并行检查所有域名状态
         const statusChecks = domains.value.map(async (domain) => {
             const status = await checkDomainStatus(domain.domain)
             const updatedDomain = await updateDomainStatus(domain.domain, status)
             return updatedDomain
         })
 
-        // 等待所有检查完成
         const updatedDomains = await Promise.all(statusChecks)
         domains.value = updatedDomains
         ElMessage.success('状态刷新完成')
@@ -417,7 +414,6 @@ const handleRefresh = async () => {
     }
 }
 
-// 在组件加载时获取告警配置
 const loadAlertConfig = async () => {
     try {
         const authData = auth.getAuthToken()
@@ -460,21 +456,18 @@ const handleExport = async () => {
         if (!authData) {
             throw new Error('未登录或登录已过期')
         }
-
-        // 显示加载提示
+        
         const loading = ElMessage.info({
             message: '正在准备导出数据...',
             duration: 0
         })
 
-        // 直接使用浏览器下载功能
         const response = await fetch('/api/domains/export', {
             headers: {
                 'Authorization': `Bearer ${authData.token}`
             }
         })
-
-        // 关闭加载提示
+        
         loading.close()
 
         if (!response.ok) {
@@ -482,10 +475,8 @@ const handleExport = async () => {
             throw new Error(errorData.message || '导出失败')
         }
 
-        // 获取文件名
         const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `domains-export-${new Date().toISOString().split('T')[0]}.json`
 
-        // 创建 Blob 并下载
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -503,13 +494,11 @@ const handleExport = async () => {
     }
 }
 
-// 切换暗黑模式
 const toggleDarkMode = () => {
     localStorage.setItem('darkMode', isDarkMode.value.toString())
     document.documentElement.classList.toggle('dark', isDarkMode.value)
 }
 
-// 初始化暗黑模式
 onMounted(() => {
     if (isDarkMode.value) {
         document.documentElement.classList.add('dark')
@@ -518,37 +507,25 @@ onMounted(() => {
     loadDomains()
     loadAlertConfig()
 })
+
 </script>
 
-<!-- 全局样式和动画 -->
 <style>
-/* 1. RGB标题动画 */
+/* 全局样式 */
 .neon-title {
-    /* 使用我们在 index.html 中引入的字体 */
     font-family: 'ZCOOL KuaiLe', cursive;
     font-weight: normal;
-    font-size: 2rem; /* 调整大小以适应您的 Header */
+    font-size: 2.2rem;
     position: relative;
-    color: transparent;
-    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.5);
-    filter: drop-shadow(0 0 5px rgba(0, 230, 230, 0.5));
-    padding: 10px 0;
-}
-
-.neon-title::before {
-    content: attr(data-text);
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
+    /* 核心修改：移除描边，直接使用渐变文字 */
     background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
     background-size: 400% 100%;
     -webkit-background-clip: text;
     background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: transparent; /* 文字设为透明，以显示背景 */
     animation: gradientFlow 5s linear infinite;
+    /* 为清晰度添加一点阴影 */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes gradientFlow {
@@ -557,43 +534,46 @@ onMounted(() => {
   100% { background-position: 0% 50%; }
 }
 
-/* 2. 修正 Element Plus 在透明背景下的样式 */
 .dark {
     --el-bg-color: transparent;
     --el-bg-color-overlay: transparent;
 }
 </style>
 
-<!-- 组件作用域样式 -->
 <style scoped>
 /* --- 背景和布局 --- */
 .home-container {
     min-height: 100vh;
-    padding: 20px;
-    padding-bottom: 80px;
-    /* 核心：动漫背景图 + 固定 + 覆盖 */
+    box-sizing: border-box; /* 确保 padding 不会撑大容器 */
+    
+    /* 核心修复：为宠物留出左侧空间 */
+    padding: 20px 20px 80px 240px; /* 上 右 下 左 */
+
+    /* 默认日间模式背景 */
     background-image: url('https://wp.upx8.com/api.php?content=%E5%8A%A8%E6%BC%AB');
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
-    transition: background-image 1s ease-in-out;
+    transition: background-image 0.5s ease-in-out;
 }
 .home-container.dark-mode {
-    /* 暗黑模式可以换一张，或者用同一张 */
-    background-image: url('https://w.wallhaven.cc/full/6d/wallhaven-6dweo7.jpg');
+    /* 核心修复：暗黑模式使用一张明确的暗色调壁纸 */
+    background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg');
 }
+
 
 /* --- 透明磨砂玻璃面板效果 --- */
 .header, .custom-table, .footer {
-    background-color: rgba(0, 0, 0, 0.25); /* 半透明背景 */
-    backdrop-filter: blur(10px); /* 核心：背景模糊，磨砂效果 */
-    -webkit-backdrop-filter: blur(10px);
+    /* 核心修复：增加背景暗度，提升对比度 */
+    background-color: rgba(0, 0, 0, 0.45); 
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 12px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 .dark-mode .header, .dark-mode .custom-table, .dark-mode .footer {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.6);
     border-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -602,16 +582,11 @@ onMounted(() => {
     display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
     align-items: center; justify-content: space-between; padding: 5px 20px;
 }
-
-.header h2 { /* h2 现在由 .neon-title 控制 */
-    margin: 0;
-}
+.header h2 { margin: 0; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-/* 使表格完全透明 */
-.custom-table {
-    margin-bottom: 60px; overflow-x: auto;
-}
+/* 表格透明化 */
+.custom-table { margin-bottom: 60px; overflow-x: auto; }
 :deep(.el-table),
 :deep(.el-table__expanded-cell) {
     background-color: transparent !important;
@@ -620,27 +595,31 @@ onMounted(() => {
 :deep(.el-table tr),
 :deep(.el-table td) {
     background-color: transparent !important;
-    color: #fff !important; /* 文字改为白色以看清 */
+    color: #fff !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
+    /* 核心修复：为所有表格文字添加描边，确保清晰 */
+    text-shadow: 0 0 3px #000, 0 0 3px #000;
 }
-:deep(.el-table__row:hover td) { /* 鼠标悬停行 */
-    background-color: rgba(255, 255, 255, 0.1) !important;
+:deep(.el-table__row:hover td) {
+    background-color: rgba(255, 255, 255, 0.15) !important;
 }
 
-/* 调整链接和状态文本颜色，并添加阴影以提高可读性 */
-.link { color: #82b1ff; text-decoration: none; transition: color 0.3s; text-shadow: 1px 1px 2px #000; }
-.link:hover { color: #c8e6c9; text-decoration: underline; }
+/* 调整链接和状态文本颜色和阴影 */
+.link { color: #82b1ff; text-decoration: none; font-weight: bold; }
+.link:hover { color: #c8e6c9; }
 
-.warning-text { color: #ffe57f; font-weight: bold; text-shadow: 1px 1px 2px #000; }
-.success-text { color: #b9f6ca; font-weight: bold; text-shadow: 1px 1px 2px #000; }
-.danger-text { color: #ffcdd2; font-weight: bold; text-shadow: 1px 1px 2px #000; }
-
+.warning-text { color: #ffe57f; font-weight: bold; }
+.success-text { color: #b9f6ca; font-weight: bold; }
+.danger-text { color: #ffcdd2; font-weight: bold; }
 
 /* --- 页脚样式 --- */
 .footer {
-    position: fixed; bottom: 0; left: 0; right: 0; padding: 16px;
+    position: fixed; bottom: 0; right: 0;
+    /* 核心修复：让页脚也遵守左侧边距 */
+    left: 240px; 
+    padding: 16px;
     color: #eee;
-    text-shadow: 1px 1px 2px #000;
+    text-shadow: 0 0 3px #000;
 }
 .footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; text-align: center; }
 .copyright { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 14px; }
