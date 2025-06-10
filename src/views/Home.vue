@@ -47,25 +47,42 @@
                     <a :href="scope.row.registrar_link" target="_blank" class="link">{{ scope.row.registrar }}</a>
                 </template>
             </el-table-column>
-            <el-table-column prop="registrar_date" label="注册时间" align="center" sortable />
-            <el-table-column prop="expiry_date" label="过期时间" align="center" sortable />
+            <!-- 修正：为普通文本列添加 template 和 class="theme-text" -->
+            <el-table-column label="注册时间" align="center" sortable prop="registrar_date">
+                <template #default="scope">
+                    <span class="theme-text">{{ scope.row.registrar_date }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="过期时间" align="center" sortable prop="expiry_date">
+                 <template #default="scope">
+                    <span class="theme-text">{{ scope.row.expiry_date }}</span>
+                </template>
+            </el-table-column>
             <el-table-column label="剩余时间" align="center" sortable
                 :sort-method="(a, b) => calculateRemainingDays(a.expiry_date) - calculateRemainingDays(b.expiry_date)">
                 <template #default="scope">
-                    <span :class="{ 'warning-text': calculateRemainingDays(scope.row.expiry_date) <= alertDays }">
+                    <span class="theme-text" :class="{ 'warning-text': calculateRemainingDays(scope.row.expiry_date) <= alertDays }">
                         {{ calculateRemainingDays(scope.row.expiry_date) }}天
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column prop="service_type" label="服务类型" align="center" sortable />
-            <el-table-column prop="status" label="状态" align="center" sortable>
+            <el-table-column label="服务类型" align="center" sortable prop="service_type">
+                 <template #default="scope">
+                    <span class="theme-text">{{ scope.row.service_type }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column label="状态" align="center" sortable prop="status">
                 <template #default="scope">
                     <span :class="scope.row.status === '在线' ? 'success-text' : 'danger-text'">
                         {{ scope.row.status }}
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column prop="memo" label="备注" align="center" sortable />
+             <el-table-column label="备注" align="center" sortable prop="memo">
+                 <template #default="scope">
+                    <span class="theme-text">{{ scope.row.memo }}</span>
+                </template>
+            </el-table-column>
             <el-table-column label="操作" width="200" align="center">
                 <template #default="scope">
                     <el-button type="primary" size="small" :icon="Edit" @click="handleEdit(scope.row)">修改</el-button>
@@ -340,29 +357,30 @@ onMounted(() => {
 
 <style> /* 全局样式 */
 :root {
-  --text-color-primary: #2c3e50;
-  --text-color-secondary: #8492a6;
-  --border-color: #e4e7ed;
-  --panel-bg-color-solid: #ffffff;
-  --panel-bg-color-misty: rgba(255, 255, 255, 0.8);
-  --panel-border-color: rgba(228, 231, 237, 0.7);
+  /* 定义颜色变量 */
+  --text-color-primary: #303133;
+  --text-color-secondary: #606266;
+  --border-color: #dcdfe6;
+  --panel-bg-solid: #ffffff;
+  --panel-bg-misty: rgba(255, 255, 255, 0.85);
+  --panel-border-color: rgba(228, 231, 237, 0.9);
 }
 html.dark {
   --text-color-primary: #e5eaf3;
   --text-color-secondary: #a8abb2;
   --border-color: #4c4d4f;
-  --panel-bg-color-solid: #141414;
-  --panel-bg-color-misty: rgba(20, 20, 20, 0.75);
+  --panel-bg-solid: #141414;
+  --panel-bg-misty: rgba(20, 20, 20, 0.75);
   --panel-border-color: rgba(80, 80, 80, 0.6);
 }
-/* --- 全局 Element Plus 组件覆盖 --- */
+/* 全局覆盖 Element Plus 对话框等组件的背景色 */
 .el-dialog, .el-drawer, .el-picker-panel, .el-select-dropdown {
-    --el-bg-color: var(--panel-bg-color-solid) !important;
+    --el-bg-color: var(--panel-bg-solid) !important;
 }
 html.dark .el-dialog, html.dark .el-drawer {
-    --el-bg-color: #1e293b !important;
+    --el-bg-color: #1e293b !important; /* 使用一个特定的深色作为弹窗背景 */
 }
-/* --- 宠物模型和霓虹标题 --- */
+
 #live2d-widget { z-index: 1 !important; pointer-events: none !important; }
 .neon-title { font-family: 'ZCOOL KuaiLe', cursive; font-weight: normal; font-size: 2.2rem; position: relative; background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000); background-size: 400% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradientFlow 5s linear infinite; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); }
 @keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
@@ -376,20 +394,23 @@ html.dark .el-dialog, html.dark .el-drawer {
 
 /* --- 面板样式 (已修正) --- */
 .header, .custom-table, .footer { position: relative; z-index: 10; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); margin-bottom: 20px; transition: all 0.3s ease-in-out; border: 1px solid var(--panel-border-color); }
-.panel-style-misty .header, .panel-style-misty .custom-table, .panel-style-misty .footer { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background-color: var(--panel-bg-color-misty); }
-.panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer { backdrop-filter: none; background-color: var(--panel-bg-color-solid); }
+.panel-style-misty .header, .panel-style-misty .custom-table, .panel-style-misty .footer { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background-color: var(--panel-bg-misty); }
+.panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer { backdrop-filter: none; background-color: var(--panel-bg-solid); }
 
 /* --- 表格文字颜色 (已修正) --- */
+/* 修正：增加一个 .theme-text 类来统一控制非链接文本的颜色 */
+.theme-text { color: var(--text-color-primary); }
 :deep(.el-table) { background-color: transparent !important; }
-:deep(.el-table th .cell), :deep(.el-table td .cell) { color: var(--text-color-primary) !important; text-shadow: none !important; }
 :deep(.el-table th), :deep(.el-table td) { border-color: var(--border-color) !important; background-color: transparent !important; transition: all 0.3s ease-in-out; }
+:deep(.el-table th .cell) { color: var(--text-color-secondary) !important; text-shadow: none !important; } /* 表头用次要颜色 */
+:deep(.el-table td .cell) { text-shadow: none !important; } /* 确保普通单元格继承 .theme-text 或其他颜色类 */
 html.light :deep(.el-table__row:hover td) { background-color: rgba(0, 0, 0, 0.04) !important; }
 html.dark :deep(.el-table__row:hover td) { background-color: rgba(255, 255, 255, 0.06) !important; }
 
 /* --- 其他元素 --- */
 .header { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 10px 20px; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.link { color: var(--el-color-primary); text-decoration: none; font-weight: 500; }
+.link { color: var(--text-color-primary); text-decoration: none; font-weight: 500; } /* 链接颜色使用主要文字颜色 */
 .link:hover { opacity: 0.8; }
 .warning-text { color: #e67e22 !important; font-weight: 500; }
 html.dark .warning-text { color: #f39c12 !important; }
