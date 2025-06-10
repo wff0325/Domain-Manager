@@ -118,7 +118,10 @@
 
         <footer class="footer">
             <div class="footer-content">
-                 <span>© 2025 Domains-Support v1.0.5</span>
+                <span>© 2025 Domains-Support v1.0.5</span>
+                <!-- 您可以将下面的链接和文本替换为您自己的 -->
+                <a href="https://github.com/L-M-K-K" target="_blank" class="link">作者: L-M-K-K</a>
+                <a href="https://www.youtube.com/@L-M-K-K" target="_blank" class="link">YouTube</a>
             </div>
         </footer>
     </div>
@@ -429,10 +432,8 @@ html.dark .el-dialog__body { color: #c3c4c7 !important; }
     background-color: transparent !important; text-shadow: none !important;
     transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
-html.light :deep(.el-table th .cell),
 html.light :deep(.el-table td .cell) { color: #31353a !important; }
 html.light :deep(.el-table th), html.light :deep(.el-table td) { border-color: #e0e0e0 !important; }
-html.dark :deep(.el-table th .cell),
 html.dark :deep(.el-table td .cell) { color: #f0f2f5 !important; }
 html.dark :deep(.el-table th), html.dark :deep(.el-table td) { border-color: #404a58 !important; }
 html.light :deep(.el-table__row:hover td) { background-color: rgba(0, 0, 0, 0.04) !important; }
@@ -453,11 +454,17 @@ html.dark .success-text { color: #2ecc71; font-weight: 500; }
 html.light .danger-text { color: #c0392b; font-weight: 500; }
 html.dark .danger-text { color: #e74c3c; font-weight: 500; }
 
+/* --- 表格标题颜色 --- */
+:deep(.el-table th .cell) {
+    color: var(--el-color-primary) !important;
+    font-weight: 500;
+}
+
 /* --- 页脚样式 --- */
 .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px; margin: 0; border-radius: 0; }
 html.light .footer { color: #495057; }
 html.dark .footer { color: #adb5bd; }
-.footer-content { display: flex; justify-content: center; font-size: 0.9em; }
+.footer-content { display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 0.9em; }
 
 /* --- 设置抽屉 --- */
 .settings-container { padding: 0 15px; }
