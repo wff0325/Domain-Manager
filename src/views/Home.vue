@@ -109,6 +109,7 @@
 </template>
 
 <script setup lang="ts">
+// JavaScript部分与上一版本相同，无需更改
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox, ElDrawer, ElRadioGroup, ElRadioButton, ElDivider } from 'element-plus';
@@ -326,158 +327,140 @@ onMounted(() => {
 });
 </script>
 
-<style> /* GLOBAL STYLES - Placed here for Live2D Pet */
+<style> /* 全局样式 */
 #live2d-widget {
-    z-index: 1 !important; /* Keep pet behind most content */
-    pointer-events: none !important; /* Allow mouse events to pass through */
+    z-index: 1 !important; 
+    pointer-events: none !important; 
 }
-.neon-title { /* Moved from scoped to global if it's truly global, or keep in scoped if only for this component */
+.neon-title {
     font-family: 'ZCOOL KuaiLe', cursive; font-weight: normal; font-size: 2.2rem; position: relative;
     background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
     background-size: 400% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
     animation: gradientFlow 5s linear infinite; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 @keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+/* === 修正：确保输入框和日期选择器内的文字颜色随主题变化 (全局影响 Element Plus) === */
+html.light .el-input__inner,
+html.light .el-textarea__inner {
+    color: #303133 !important; 
+}
+html.dark .el-input__inner,
+html.dark .el-textarea__inner {
+    color: #E5EAF3 !important; 
+}
+
+/* 对话框标题和内容文字颜色，确保它们也随主题变化 */
+html.light .el-dialog__title { color: #303133 !important; }
+html.dark .el-dialog__title { color: #E5EAF3 !important; }
+
+html.light .el-dialog__body { color: #474747 !important; } /* 比输入框文字稍浅一点 */
+html.dark .el-dialog__body { color: #c3c4c7 !important; } /* 比输入框文字稍暗一点 */
+
+/* 如果需要，还可以调整日期选择器面板的颜色，但通常EP会自动处理 */
+/* 例如: html.dark .el-date-picker { background-color: #141414; } */
 </style>
 
 <style scoped>
-/* --- Base Container Styling --- */
+/* --- 基础容器样式 --- */
 .home-container {
-    min-height: 100vh;
-    box-sizing: border-box;
-    padding: 20px 20px 80px 20px;
-    background-size: cover;
-    background-position: center center;
-    background-attachment: fixed;
+    min-height: 100vh; box-sizing: border-box; padding: 20px 20px 80px 20px;
+    background-size: cover; background-position: center center; background-attachment: fixed;
     transition: background-image 0.4s ease-in-out, background-color 0.4s ease-in-out;
 }
-
-/* --- Light Mode Specific Background --- */
 .home-container.light {
     background-color: #e0eafc; 
     background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 }
-
-/* --- Dark Mode Specific Background --- */
 .home-container.dark {
     background-color: #0d1b2a; 
     background-image: url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 }
 
-/* --- Panel Base Styling --- */
+/* --- 面板基础样式 --- */
 .header, .custom-table, .footer {
-    position: relative;
-    z-index: 10; /* Ensure panels are above the pet model if it's at z-index 1 */
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    margin-bottom: 20px;
+    position: relative; z-index: 10; border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); margin-bottom: 20px;
     transition: background-color 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out, border-color 0.3s ease-in-out;
     border: 1px solid transparent;
 }
 
-/* --- Misty Panel Style --- */
+/* --- Misty 面板样式 --- */
 .panel-style-misty .header, .panel-style-misty .custom-table, .panel-style-misty .footer {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 .home-container.light .panel-style-misty .header, 
 .home-container.light .panel-style-misty .custom-table, 
 .home-container.light .panel-style-misty .footer {
-    background-color: rgba(255, 255, 255, 0.75); 
-    border-color: rgba(200, 200, 200, 0.4);
+    background-color: rgba(255, 255, 255, 0.75); border-color: rgba(200, 200, 200, 0.4);
 }
 .home-container.dark .panel-style-misty .header, 
 .home-container.dark .panel-style-misty .custom-table, 
 .home-container.dark .panel-style-misty .footer {
-    background-color: rgba(25, 35, 45, 0.7); 
-    border-color: rgba(100, 100, 120, 0.5);
+    background-color: rgba(25, 35, 45, 0.7); border-color: rgba(100, 100, 120, 0.5);
 }
 
-/* --- Solid Panel Style --- */
+/* --- Solid 面板样式 --- */
 .panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer {
     backdrop-filter: none;
 }
 .home-container.light .panel-style-solid .header, 
 .home-container.light .panel-style-solid .custom-table, 
 .home-container.light .panel-style-solid .footer {
-    background-color: #ffffff; 
-    border-color: #d0d5dd;
+    background-color: #ffffff; border-color: #d0d5dd;
 }
 .home-container.dark .panel-style-solid .header, 
 .home-container.dark .panel-style-solid .custom-table, 
 .home-container.dark .panel-style-solid .footer {
-    background-color: #1e293b; 
-    border-color: #334155;
+    background-color: #1e293b; border-color: #334155;
 }
 
-/* --- Table Specific Styling (Adaptive Text Color - FINAL FIX) --- */
-:deep(.el-table), :deep(.el-table__expanded-cell) {
-    background-color: transparent !important;
-}
+/* --- 表格特定样式 (文字颜色随主题变化 - 已修正) --- */
+:deep(.el-table), :deep(.el-table__expanded-cell) { background-color: transparent !important; }
 :deep(.el-table th), :deep(.el-table tr), :deep(.el-table td) {
-    background-color: transparent !important;
-    text-shadow: none !important;
+    background-color: transparent !important; text-shadow: none !important;
     transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
 
-/* Light Theme Table Text & Borders: Targets .cell within th/td using global html.light */
+/* 浅色主题表格文字和边框 */
 html.light :deep(.el-table th .cell),
-html.light :deep(.el-table td .cell) { /* This now correctly targets the text container */
-    color: #31353a !important; /* Slightly darker for better contrast on light backgrounds */
-}
-html.light :deep(.el-table th), /* Borders for header cells */
-html.light :deep(.el-table td) { /* Borders for data cells */
-    border-color: #e0e0e0 !important; /* Lighter border for light theme */
-}
+html.light :deep(.el-table td .cell) { color: #31353a !important; }
+html.light :deep(.el-table th), html.light :deep(.el-table td) { border-color: #e0e0e0 !important; }
 
-/* Dark Theme Table Text & Borders: Targets .cell within th/td using global html.dark */
+/* 深色主题表格文字和边框 */
 html.dark :deep(.el-table th .cell),
-html.dark :deep(.el-table td .cell) { /* This now correctly targets the text container */
-    color: #f0f2f5 !important; /* Off-white for dark theme text */
-}
-html.dark :deep(.el-table th), /* Borders for header cells */
-html.dark :deep(.el-table td) { /* Borders for data cells */
-    border-color: #404a58 !important; /* Subtler border for dark theme */
-}
+html.dark :deep(.el-table td .cell) { color: #f0f2f5 !important; }
+html.dark :deep(.el-table th), html.dark :deep(.el-table td) { border-color: #404a58 !important; }
 
-/* Row hover effect */
-html.light :deep(.el-table__row:hover td) {
-    background-color: rgba(0, 0, 0, 0.04) !important;
-}
-html.dark :deep(.el-table__row:hover td) {
-    background-color: rgba(255, 255, 255, 0.06) !important;
-}
+/* 行悬停效果 */
+html.light :deep(.el-table__row:hover td) { background-color: rgba(0, 0, 0, 0.04) !important; }
+html.dark :deep(.el-table__row:hover td) { background-color: rgba(255, 255, 255, 0.06) !important; }
 
-/* --- Header & Buttons --- */
+/* --- 头部和按钮 --- */
 .header { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 10px 20px; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-/* --- Text & Link Colors (Theme-Adaptive) --- */
+/* --- 文字和链接颜色 (随主题变化) --- */
 .link { color: var(--el-color-primary); text-decoration: none; font-weight: 500; }
 .link:hover { opacity: 0.8; }
+html.light .warning-text { color: #e67e22 !important; font-weight: 500; }
+html.dark .warning-text { color: #f39c12 !important; font-weight: 500; }
+html.light .success-text { color: #27ae60; font-weight: 500; }
+html.dark .success-text { color: #2ecc71; font-weight: 500; }
+html.light .danger-text { color: #c0392b; font-weight: 500; }
+html.dark .danger-text { color: #e74c3c; font-weight: 500; }
 
-/* Warning, Success, Danger texts should also adapt if not using Element Plus specific classes */
-html.light .warning-text { color: #e67e22 !important; font-weight: 500; } /* A more distinct orange */
-html.dark .warning-text { color: #f39c12 !important; font-weight: 500; } /* A bright yellow/orange for dark */
-
-html.light .success-text { color: #27ae60; font-weight: 500; } /* A clear green */
-html.dark .success-text { color: #2ecc71; font-weight: 500; } /* Brighter green for dark */
-
-html.light .danger-text { color: #c0392b; font-weight: 500; } /* A strong red */
-html.dark .danger-text { color: #e74c3c; font-weight: 500; } /* Clearer red for dark */
-
-/* --- Footer Styling --- */
+/* --- 页脚样式 --- */
 .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px; margin: 0; border-radius: 0; }
 html.light .footer { color: #495057; }
 html.dark .footer { color: #adb5bd; }
 .footer-content { display: flex; justify-content: center; font-size: 0.9em; }
 
-/* --- Settings Drawer --- */
+/* --- 设置抽屉 --- */
 .settings-container { padding: 0 15px; }
 .settings-group { display: flex; justify-content: center; width: 100%; margin-top: 12px; margin-bottom: 12px; }
 .color-picker { display: flex; justify-content: space-around; padding: 15px 0; }
 .color-swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
 .color-swatch:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 .color-swatch.active { border-color: var(--el-color-primary); transform: translateY(-1px) scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
 </style>
