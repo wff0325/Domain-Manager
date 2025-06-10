@@ -124,9 +124,9 @@ interface ApiResponse<T = any> { status: number; message: string; data: T; }
 
 const settingsDrawerVisible = ref(false);
 const theme = ref(localStorage.getItem('theme') || 'system');
-const accentColor = ref(localStorage.getItem('accentColor') || '#409EFF'); // Default Element Plus blue
+const accentColor = ref(localStorage.getItem('accentColor') || '#409EFF');
 const panelStyle = ref(localStorage.getItem('panelStyle') || 'misty');
-const isDarkMode = ref(false);
+const isDarkMode = ref(false); // Used for .home-container's own :class binding
 
 const accentColors = ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#909399'];
 
@@ -141,11 +141,10 @@ const applySettings = () => {
     } else {
         currentIsDark = theme.value === 'dark';
     }
-    isDarkMode.value = currentIsDark; // Update reactive variable
-    
-    // Apply class to the root <html> element for global styles (like Element Plus dark mode)
-    document.documentElement.className = currentIsDark ? 'dark' : '';
-    // Apply accent color using CSS variable
+    isDarkMode.value = currentIsDark; // For .home-container :class
+
+    // Apply class to the root <html> element for global styles (Element Plus components)
+    document.documentElement.className = currentIsDark ? 'dark' : 'light'; // Explicitly set 'light' or 'dark'
     document.documentElement.style.setProperty('--el-color-primary', accentColor.value);
 };
 
@@ -153,16 +152,15 @@ const setAccentColor = (color: string) => { accentColor.value = color; };
 const panelStyleClass = computed(() => `panel-style-${panelStyle.value}`);
 
 onMounted(() => {
-    applySettings(); // Apply on initial load
+    applySettings();
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         if (theme.value === 'system') applySettings();
     });
 });
-// Watch for direct changes to theme or accentColor and re-apply
 watch([theme, accentColor], applySettings, { immediate: true });
 
 
-// --- Standard Component Logic (No changes needed here from previous correct version) ---
+// --- Standard Component Logic (No changes from previous correct version) ---
 const router = useRouter();
 const auth = useAuth();
 const domains = ref<DomainData[]>([]);
@@ -272,7 +270,7 @@ const handleRefresh = async () => {
             if (result.status === 200 && result.data) return result.data;
             throw new Error(result.message || '更新失败');
         };
-        const updatedDomains = await Promise.all(domains.value.map(async (domainItem) => { // Renamed 'domain' to 'domainItem' to avoid conflict
+        const updatedDomains = await Promise.all(domains.value.map(async (domainItem) => {
             const status = await checkDomainStatus(domainItem.domain);
             return await updateDomainStatus(domainItem.domain, status);
         }));
@@ -343,17 +341,16 @@ onMounted(() => {
     transition: background-image 0.4s ease-in-out, background-color 0.4s ease-in-out;
 }
 
-/* --- Light Mode Specific --- */
+/* --- Light Mode Specific Background --- */
 .home-container.light {
     background-color: #e0eafc; /* Fallback light color */
-    /* A light, subtle abstract background or a nature scene would work well. Using a placeholder for now. */
-    background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80');
+    background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 }
 
-/* --- Dark Mode Specific --- */
+/* --- Dark Mode Specific Background --- */
 .home-container.dark {
     background-color: #0d1b2a; /* Fallback dark color */
-    background-image: url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80');
+    background-image: url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 }
 
 
@@ -365,7 +362,7 @@ onMounted(() => {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     margin-bottom: 20px;
     transition: background-color 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out, border-color 0.3s ease-in-out;
-    border: 1px solid transparent; /* Start with transparent border */
+    border: 1px solid transparent;
 }
 
 /* --- Misty Panel Style --- */
@@ -373,80 +370,98 @@ onMounted(() => {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
-.light .panel-style-misty .header, .light .panel-style-misty .custom-table, .light .panel-style-misty .footer {
-    background-color: rgba(255, 255, 255, 0.7);
-    border-color: rgba(200, 200, 200, 0.3);
+.home-container.light .panel-style-misty .header, 
+.home-container.light .panel-style-misty .custom-table, 
+.home-container.light .panel-style-misty .footer {
+    background-color: rgba(255, 255, 255, 0.75); /* Slightly more opaque for better readability */
+    border-color: rgba(200, 200, 200, 0.4);
 }
-.dark .panel-style-misty .header, .dark .panel-style-misty .custom-table, .dark .panel-style-misty .footer {
-    background-color: rgba(20, 20, 30, 0.6);
-    border-color: rgba(100, 100, 120, 0.4);
+.home-container.dark .panel-style-misty .header, 
+.home-container.dark .panel-style-misty .custom-table, 
+.home-container.dark .panel-style-misty .footer {
+    background-color: rgba(25, 35, 45, 0.7); /* Adjusted dark misty color */
+    border-color: rgba(100, 100, 120, 0.5);
 }
 
 /* --- Solid Panel Style --- */
 .panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer {
     backdrop-filter: none;
 }
-.light .panel-style-solid .header, .light .panel-style-solid .custom-table, .light .panel-style-solid .footer {
-    background-color: #f8f9fa; /* Slightly off-white for solid light panels */
-    border-color: #dee2e6;
+.home-container.light .panel-style-solid .header, 
+.home-container.light .panel-style-solid .custom-table, 
+.home-container.light .panel-style-solid .footer {
+    background-color: #ffffff; /* Pure white for solid light panels */
+    border-color: #d0d5dd;
 }
-.dark .panel-style-solid .header, .dark .panel-style-solid .custom-table, .dark .panel-style-solid .footer {
-    background-color: #1f2937; /* Dark grey for solid dark panels */
-    border-color: #374151;
+.home-container.dark .panel-style-solid .header, 
+.home-container.dark .panel-style-solid .custom-table, 
+.home-container.dark .panel-style-solid .footer {
+    background-color: #1e293b; /* A common dark panel color */
+    border-color: #334155;
 }
 
 
-/* --- Table Specific Styling (Adaptive Text Color - FIXED) --- */
+/* --- Table Specific Styling (Adaptive Text Color - FINAL FIX) --- */
 :deep(.el-table), :deep(.el-table__expanded-cell) {
     background-color: transparent !important;
 }
 :deep(.el-table th), :deep(.el-table tr), :deep(.el-table td) {
     background-color: transparent !important;
-    text-shadow: none !important; /* Remove any text shadow for clarity */
+    text-shadow: none !important;
     transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
 
-/* Light theme table text and borders */
-.light :deep(.el-table th), .light :deep(.el-table tr), .light :deep(.el-table td) {
-    color: #343a40 !important; /* Darker grey for light theme text */
-    border-color: rgba(0, 0, 0, 0.08) !important;
+/* Light Theme Table Text & Borders: Targets .cell within th/td using global html.light */
+html.light :deep(.el-table th .cell),
+html.light :deep(.el-table td .cell) {
+    color: #212529 !important; /* Bootstrap's default dark text color */
 }
-/* Dark theme table text and borders */
-.dark :deep(.el-table th), .dark :deep(.el-table tr), .dark :deep(.el-table td) {
-    color: #e9ecef !important; /* Light grey for dark theme text */
-    border-color: rgba(255, 255, 255, 0.12) !important;
+html.light :deep(.el-table th),
+html.light :deep(.el-table td) {
+    border-color: #dee2e6 !important; /* Bootstrap's default table border color */
 }
+
+/* Dark Theme Table Text & Borders: Targets .cell within th/td using global html.dark */
+html.dark :deep(.el-table th .cell),
+html.dark :deep(.el-table td .cell) {
+    color: #f8f9fa !important; /* Bootstrap's default light text color */
+}
+html.dark :deep(.el-table th),
+html.dark :deep(.el-table td) {
+    border-color: #495057 !important; /* Bootstrap's dark table border color */
+}
+
 /* Row hover effect */
-.light :deep(.el-table__row:hover td) {
-    background-color: rgba(0, 0, 0, 0.04) !important;
+html.light :deep(.el-table__row:hover td) {
+    background-color: rgba(0, 0, 0, 0.05) !important;
 }
-.dark :deep(.el-table__row:hover td) {
-    background-color: rgba(255, 255, 255, 0.06) !important;
+html.dark :deep(.el-table__row:hover td) {
+    background-color: rgba(255, 255, 255, 0.075) !important;
 }
 
 
 /* --- Header & Buttons --- */
-.header { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 10px 20px; } /* Increased padding */
+.header { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 10px 20px; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-/* --- Text & Link Colors --- */
-.link { color: var(--el-color-primary); text-decoration: none; font-weight: 500; } /* Adjusted font-weight */
-.link:hover { opacity: 0.75; }
+/* --- Text & Link Colors (Theme-Adaptive) --- */
+.link { color: var(--el-color-primary); text-decoration: none; font-weight: 500; }
+.link:hover { opacity: 0.8; }
 
-.warning-text { color: #fd7e14 !important; font-weight: 500; } /* Bootstrap orange */
-.dark .warning-text { color: #ffc107 !important; } /* Bootstrap warning yellow for dark */
+html.light .warning-text { color: #fd7e14 !important; font-weight: 500; }
+html.dark .warning-text { color: #ffca2c !important; font-weight: 500; }
 
-.success-text { color: #198754; font-weight: 500; } /* Bootstrap success green */
-.dark .success-text { color: #20c997; } /* Lighter green for dark */
+html.light .success-text { color: #198754; font-weight: 500; }
+html.dark .success-text { color: #20c997; font-weight: 500; }
 
-.danger-text { color: #dc3545; font-weight: 500; } /* Bootstrap danger red */
-.dark .danger-text { color: #fd7e14; } /* Orange-red for dark */
+html.light .danger-text { color: #dc3545; font-weight: 500; }
+html.dark .danger-text { color: #ff6b6b; font-weight: 500; }
 
 
 /* --- Footer Styling --- */
 .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px; margin: 0; border-radius: 0; }
-.light .footer { color: #495057; }
-.dark .footer { color: #adb5bd; }
+html.light .footer { color: #495057; }
+html.dark .footer { color: #adb5bd; }
 .footer-content { display: flex; justify-content: center; font-size: 0.9em; }
 
 /* --- Settings Drawer --- */
@@ -457,7 +472,7 @@ onMounted(() => {
 .color-swatch:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 .color-swatch.active { border-color: var(--el-color-primary); transform: translateY(-1px) scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-/* Neon Title (Keep as is - it's a distinct element) */
+/* Neon Title */
 .neon-title {
     font-family: 'ZCOOL KuaiLe', cursive; font-weight: normal; font-size: 2.2rem; position: relative;
     background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
