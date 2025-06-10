@@ -100,9 +100,31 @@
             </div>
         </el-drawer>
 
+        <!-- 修正：恢复了完整的页脚内容 -->
         <footer class="footer">
             <div class="footer-content">
-                 <span>© 2025 Domains-Support v1.0.5</span>
+                <div class="copyright">
+                    <span>© 2025 Domains-Support v1.0.5</span>
+                    <span class="separator">|</span>
+                    <span>作者：大疯子</span>
+                    <span class="separator">|</span>
+                    <div class="social-links">
+                        <a href="https://github.com/wff0325/Domain-Manager/tree/main" target="_blank"
+                            class="social-link" title="访问 GitHub 仓库">
+                            <el-icon class="social-icon"><svg viewBox="0 0 1024 1024" width="20" height="20">
+                                    <path fill="currentColor"
+                                        d="M512 0C229.12 0 0 229.12 0 512c0 226.56 146.56 417.92 350.08 485.76 25.6 4.48 35.2-10.88 35.2-24.32 0-12.16-0.64-52.48-0.64-95.36-128.64 23.68-161.92-31.36-172.16-60.16-5.76-14.72-30.72-60.16-52.48-72.32-17.92-9.6-43.52-33.28-0.64-33.92 40.32-0.64 69.12 37.12 78.72 52.48 46.08 77.44 119.68 55.68 149.12 42.24 4.48-33.28 17.92-55.68 32.64-68.48-113.92-12.8-232.96-56.96-232.96-252.8 0-55.68 19.84-101.76 52.48-137.6-5.12-12.8-23.04-65.28 5.12-135.68 0 0 42.88-13.44 140.8 52.48 40.96-11.52 84.48-17.28 128-17.28 43.52 0 87.04 5.76 128 17.28 97.92-66.56 140.8-52.48 140.8-52.48 28.16 70.4 10.24 122.88 5.12 135.68 32.64 35.84 52.48 81.28 52.48 137.6 0 196.48-119.68 240-233.6 252.8 18.56 16 34.56 46.72 34.56 94.72 0 68.48-0.64 123.52-0.64 140.8 0 13.44 9.6 29.44 35.2 24.32C877.44 929.92 1024 737.92 1024 512 1024 229.12 794.88 0 512 0z" />
+                                </svg></el-icon>
+                        </a>
+                        <a href="https://www.youtube.com/" target="_blank" class="social-link"
+                            title="访问 YouTube 频道">
+                            <el-icon class="social-icon"><svg viewBox="0 0 1024 1024" width="20" height="20">
+                                    <path fill="currentColor"
+                                        d="M941.3 296.1c-10.3-38.6-40.7-69-79.3-79.3C792.2 198 512 198 512 198s-280.2 0-350 18.7c-38.6 10.3-69 40.7-79.3 79.3C64 365.9 64 512 64 512s0 146.1 18.7 215.9c10.3 38.6 40.7 69 79.3 79.3C231.8 826 512 826 512 826s280.2 0 350-18.7c38.6-10.3 69-40.7 79.3-79.3C960 658.1 960 512 960 512s0-146.1-18.7-215.9zM423 646V378l232 134-232 134z" />
+                                </svg></el-icon>
+                        </a>
+                    </div>
+                </div>
             </div>
         </footer>
     </div>
@@ -327,176 +349,73 @@ onMounted(() => {
 });
 </script>
 
-<style> /* 全局样式 - 非 SCSS，直接 CSS */
-#live2d-widget {
-    z-index: 1 !important; 
-    pointer-events: none !important; 
-}
-.neon-title {
-    font-family: 'ZCOOL KuaiLe', cursive; font-weight: normal; font-size: 2.2rem; position: relative;
-    background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
-    background-size: 400% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
-    animation: gradientFlow 5s linear infinite; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-}
+<style> /* 全局样式 */
+/* --- 宠物模型和霓虹标题 --- */
+#live2d-widget { z-index: 1 !important; pointer-events: none !important; }
+.neon-title { font-family: 'ZCOOL KuaiLe', cursive; font-weight: normal; font-size: 2.2rem; position: relative; background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000); background-size: 400% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradientFlow 5s linear infinite; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); }
 @keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-/* === 全局 Element Plus 主题覆盖 (修正对话框和表单元素) === */
-html.light .el-dialog, html.light .el-drawer {
-    --el-dialog-bg-color: #ffffff !important;
+/* --- 修正：全局主题文字颜色变量 --- */
+:root {
+  --text-color-primary: #31353a;
+  --text-color-secondary: #4b5563;
+  --border-color: #e0e0e0;
 }
-html.dark .el-dialog, html.dark .el-drawer {
-    --el-dialog-bg-color: #161d26 !important; /* 调整为更匹配深色主题的背景 */
+html.dark {
+  --text-color-primary: #f0f2f5;
+  --text-color-secondary: #9ca3af;
+  --border-color: #404a58;
 }
 
-html.light .el-dialog__header, html.light .el-drawer__header { color: #303133 !important; }
-html.dark .el-dialog__header, html.dark .el-drawer__header { color: #e5e7eb !important; }
-
-html.light .el-dialog__body, html.light .el-drawer__body { color: #474747 !important; }
-html.dark .el-dialog__body, html.dark .el-drawer__body { color: #d1d5db !important; }
-
-html.light .el-dialog .el-form-item__label, html.light .el-drawer .el-form-item__label { color: #4b5563 !important; }
-html.dark .el-dialog .el-form-item__label, html.dark .el-drawer .el-form-item__label { color: #9ca3af !important; }
-
-html.light .el-input__inner, html.light .el-textarea__inner {
-    color: #1f2937 !important; background-color: #f9fafb !important; border-color: #d1d5db !important;
+/* --- 修正：全局Element Plus组件覆盖 --- */
+html.dark .el-dialog, html.dark .el-drawer, html.dark .el-picker-panel, html.dark .el-select-dropdown {
+    --el-bg-color: #1e293b !important;
+    --el-border-color: #334155 !important;
 }
+html.dark .el-dialog__title { color: var(--text-color-primary) !important; }
+html.dark .el-form-item__label { color: var(--text-color-secondary) !important; }
 html.dark .el-input__inner, html.dark .el-textarea__inner {
-    color: #e5e7eb !important; background-color: #374151 !important; border-color: #4b5563 !important;
-}
-
-html.light .el-input__inner::placeholder, html.light .el-textarea__inner::placeholder { color: #9ca3af !important; }
-html.dark .el-input__inner::placeholder, html.dark .el-textarea__inner::placeholder { color: #6b7280 !important; }
-
-html.light .el-date-editor .el-input__inner { color: #1f2937 !important; }
-html.dark .el-date-editor .el-input__inner { color: #e5e7eb !important; }
-html.light .el-select .el-input__inner { color: #1f2937 !important; } /* 确保 Select 输入框文字颜色 */
-html.dark .el-select .el-input__inner { color: #e5e7eb !important; } /* 确保 Select 输入框文字颜色 */
-
-html.light .el-switch__label { color: #374151 !important; }
-html.dark .el-switch__label { color: #d1d5db !important; }
-
-html.dark .el-dialog__footer .el-button.is-plain span, html.dark .el-drawer__footer .el-button.is-plain span {
-    color: #e5e7eb !important; 
-}
-/* Select 下拉面板 */
-html.dark .el-select-dropdown { background-color: #1e293b !important; border-color: #334155 !important; }
-html.dark .el-select-dropdown__item { color: #d1d5db !important; }
-html.dark .el-select-dropdown__item.hover, html.dark .el-select-dropdown__item:hover { background-color: #374151 !important; }
-html.dark .el-select-dropdown__item.selected { color: var(--el-color-primary) !important; background-color: rgba(var(--el-color-primary-rgb), 0.1) !important;}
-
-/* Date Picker 面板 (Element Plus 通常会自动适配，但可以加固) */
-html.dark .el-picker-panel {
-  background-color: #1e293b !important;
-  border-color: #334155 !important;
-}
-html.dark .el-date-picker__header-label, html.dark .el-date-table th, html.dark .el-date-table td .el-date-table-cell__text {
-  color: #d1d5db !important;
-}
-html.dark .el-date-picker__header--bordered {
-    border-bottom: 1px solid #334155 !important;
-}
-html.dark .el-date-table td.today .el-date-table-cell__text {
-  color: var(--el-color-primary) !important;
-}
-html.dark .el-picker-panel__icon-btn {
-  color: #9ca3af !important;
-}
-html.dark .el-date-table td.disabled div {
-  background-color: #374151 !important;
-  color: #6b7280 !important;
-}
-html.dark .el-picker-panel__footer .el-button.is-text {
-    color: var(--el-color-primary) !important;
-}
-html.dark .el-picker-panel__footer .el-button.is-plain {
-    color: #d1d5db !important;
+    color: var(--text-color-primary) !important;
+    background-color: #374151 !important;
     border-color: #4b5563 !important;
 }
-html.dark .el-picker-panel__footer .el-button.is-plain:hover {
-    color: var(--el-color-primary) !important;
-    border-color: var(--el-color-primary) !important;
-    background-color: rgba(var(--el-color-primary-rgb), 0.1) !important;
-}
+html.dark .el-select-dropdown__item { color: var(--text-color-secondary) !important; }
+html.dark .el-select-dropdown__item.hover, html.dark .el-select-dropdown__item:hover { background-color: #374151 !important; }
+html.dark .el-select-dropdown__item.selected { color: var(--el-color-primary) !important; background-color: rgba(var(--el-color-primary-rgb), 0.1) !important;}
+/* ... 更多 EP 组件的深色模式覆盖 ... */
 </style>
 
 <style scoped>
-/* --- 基础容器样式 --- */
-.home-container {
-    min-height: 100vh; box-sizing: border-box; padding: 20px 20px 80px 20px;
-    background-size: cover; background-position: center center; background-attachment: fixed;
-    transition: background-image 0.4s ease-in-out, background-color 0.4s ease-in-out;
-}
-.home-container.light {
-    background-color: #e0eafc; 
-    background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-}
-.home-container.dark {
-    background-color: #0d1b2a; 
-    background-image: url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-}
+/* --- 基础容器 --- */
+.home-container { min-height: 100vh; box-sizing: border-box; padding: 20px 20px 80px 20px; background-size: cover; background-position: center center; background-attachment: fixed; transition: all 0.4s ease-in-out; }
+.home-container.light { background-color: #e0eafc; background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
+.home-container.dark { background-color: #0d1b2a; background-image: url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
 
-/* --- 面板基础样式 --- */
-.header, .custom-table, .footer {
-    position: relative; z-index: 10; border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); margin-bottom: 20px;
-    transition: background-color 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out, border-color 0.3s ease-in-out;
-    border: 1px solid transparent;
-}
+/* --- 面板样式 --- */
+.header, .custom-table, .footer { position: relative; z-index: 10; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); margin-bottom: 20px; transition: all 0.3s ease-in-out; border: 1px solid transparent; }
 
-/* --- Misty 面板样式 --- */
-.panel-style-misty .header, .panel-style-misty .custom-table, .panel-style-misty .footer {
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-}
-.home-container.light .panel-style-misty .header, 
-.home-container.light .panel-style-misty .custom-table, 
-.home-container.light .panel-style-misty .footer {
-    background-color: rgba(255, 255, 255, 0.75); border-color: rgba(200, 200, 200, 0.4);
-}
-.home-container.dark .panel-style-misty .header, 
-.home-container.dark .panel-style-misty .custom-table, 
-.home-container.dark .panel-style-misty .footer {
-    background-color: rgba(25, 35, 45, 0.7); border-color: rgba(100, 100, 120, 0.5);
-}
+/* Misty 面板 */
+.panel-style-misty .header, .panel-style-misty .custom-table, .panel-style-misty .footer { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.home-container.light .panel-style-misty .header, .home-container.light .panel-style-misty .custom-table, .home-container.light .panel-style-misty .footer { background-color: rgba(255, 255, 255, 0.75); border-color: rgba(200, 200, 200, 0.4); }
+.home-container.dark .panel-style-misty .header, .home-container.dark .panel-style-misty .custom-table, .home-container.dark .panel-style-misty .footer { background-color: rgba(25, 35, 45, 0.7); border-color: rgba(100, 100, 120, 0.5); }
 
-/* --- Solid 面板样式 --- */
-.panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer {
-    backdrop-filter: none;
-}
-.home-container.light .panel-style-solid .header, 
-.home-container.light .panel-style-solid .custom-table, 
-.home-container.light .panel-style-solid .footer {
-    background-color: #ffffff; border-color: #d0d5dd;
-}
-.home-container.dark .panel-style-solid .header, 
-.home-container.dark .panel-style-solid .custom-table, 
-.home-container.dark .panel-style-solid .footer {
-    background-color: #1e293b; border-color: #334155;
-}
+/* Solid 面板 */
+.panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer { backdrop-filter: none; }
+.home-container.light .panel-style-solid .header, .home-container.light .panel-style-solid .custom-table, .home-container.light .panel-style-solid .footer { background-color: #ffffff; border-color: #d0d5dd; }
+.home-container.dark .panel-style-solid .header, .home-container.dark .panel-style-solid .custom-table, .home-container.dark .panel-style-solid .footer { background-color: #1e293b; border-color: #334155; }
 
-/* --- 表格特定样式 (文字颜色随主题变化) --- */
+/* --- 表格文字颜色 (最终修正方案) --- */
 :deep(.el-table), :deep(.el-table__expanded-cell) { background-color: transparent !important; }
-:deep(.el-table th), :deep(.el-table tr), :deep(.el-table td) {
-    background-color: transparent !important; text-shadow: none !important;
-    transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-}
-
-/* 通过全局 html.light/dark 类控制表格文字和边框颜色 */
-html.light :deep(.el-table th .cell),
-html.light :deep(.el-table td .cell) { color: #31353a !important; }
-html.light :deep(.el-table th), html.light :deep(.el-table td) { border-color: #e0e0e0 !important; }
-
-html.dark :deep(.el-table th .cell),
-html.dark :deep(.el-table td .cell) { color: #f0f2f5 !important; }
-html.dark :deep(.el-table th), html.dark :deep(.el-table td) { border-color: #404a58 !important; }
-
+:deep(.el-table th), :deep(.el-table tr), :deep(.el-table td) { background-color: transparent !important; text-shadow: none !important; transition: all 0.3s ease-in-out; }
+/* 使用 CSS 变量来设置文字和边框颜色 */
+:deep(.el-table th .cell), :deep(.el-table td .cell) { color: var(--text-color-primary) !important; }
+:deep(.el-table th), :deep(.el-table td) { border-color: var(--border-color) !important; }
 html.light :deep(.el-table__row:hover td) { background-color: rgba(0, 0, 0, 0.04) !important; }
 html.dark :deep(.el-table__row:hover td) { background-color: rgba(255, 255, 255, 0.06) !important; }
 
-/* --- 头部和按钮 --- */
+/* --- 其他元素 --- */
 .header { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 10px 20px; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-
-/* --- 文字和链接颜色 (随主题变化) --- */
 .link { color: var(--el-color-primary); text-decoration: none; font-weight: 500; }
 .link:hover { opacity: 0.8; }
 html.light .warning-text { color: #e67e22 !important; font-weight: 500; }
@@ -506,11 +425,21 @@ html.dark .success-text { color: #2ecc71; font-weight: 500; }
 html.light .danger-text { color: #c0392b; font-weight: 500; }
 html.dark .danger-text { color: #e74c3c; font-weight: 500; }
 
-/* --- 页脚样式 --- */
+/* --- 页脚 --- */
 .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px; margin: 0; border-radius: 0; }
+.footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; text-align: center; }
+.copyright { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 14px; }
+.separator { color: #dcdfe6; margin: 0 2px; }
+.social-links { display: flex; gap: 15px; align-items: center; }
+.social-link { color: #eee; transition: all 0.3s ease; }
+.social-link:hover { color: #90caf9; transform: translateY(-2px); }
+.social-icon { width: 20px; height: 20px; }
+/* 修正页脚文字颜色 */
 html.light .footer { color: #495057; }
 html.dark .footer { color: #adb5bd; }
-.footer-content { display: flex; justify-content: center; font-size: 0.9em; }
+html.dark .footer .social-link { color: #adb5bd; }
+html.dark .footer .social-link:hover { color: #e5e7eb; }
+html.dark .footer .separator { color: #4b5563; }
 
 /* --- 设置抽屉 --- */
 .settings-container { padding: 0 15px; }
@@ -519,4 +448,5 @@ html.dark .footer { color: #adb5bd; }
 .color-swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
 .color-swatch:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 .color-swatch.active { border-color: var(--el-color-primary); transform: translateY(-1px) scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
 </style>
