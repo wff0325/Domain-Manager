@@ -6,6 +6,7 @@
                 <el-button type="primary" size="small" :icon="Refresh" :loading="refreshing"
                     @click="handleRefresh">刷新</el-button>
                 
+                <!-- 系统操作按钮 -->
                 <el-dropdown trigger="click">
                     <el-button type="primary" size="small">
                         系统
@@ -21,6 +22,7 @@
                     </template>
                 </el-dropdown>
                 
+                <!-- 全新的主题切换器 -->
                 <el-dropdown trigger="click" @command="setTheme">
                     <el-button type="primary" size="small">
                         <el-icon>
@@ -132,34 +134,17 @@ import { createDomain, updateDomain, deleteDomain, type DomainData } from '../ap
 
 type Domain = DomainData;
 type Theme = 'light' | 'dark' | 'system';
-
-interface AlertConfig {
-    tg_token: string;
-    tg_userid: string;
-    days: number;
-}
-interface ApiSuccessResponse<T> {
-    status: 200;
-    message: string;
-    data: T;
-}
-interface ApiErrorResponse {
-    status: number;
-    message: string;
-    data: null;
-}
+interface AlertConfig { tg_token: string; tg_userid: string; days: number; }
+interface ApiSuccessResponse<T> { status: 200; message: string; data: T; }
+interface ApiErrorResponse { status: number; message: string; data: null; }
 type GenericApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
 const theme = ref<Theme>((localStorage.getItem('theme') as Theme) || 'system');
 const effectiveDarkMode = computed(() => {
-    if (theme.value === 'system') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
+    if (theme.value === 'system') return window.matchMedia('(prefers-color-scheme: dark)').matches;
     return theme.value === 'dark';
 });
-const applyTheme = (isDark: boolean) => {
-    document.documentElement.classList.toggle('dark', isDark);
-};
+const applyTheme = (isDark: boolean) => { document.documentElement.classList.toggle('dark', isDark); };
 const setTheme = (newTheme: Theme) => {
     if(!newTheme) return;
     theme.value = newTheme;
@@ -180,10 +165,7 @@ const editData = ref<Domain | undefined>();
 const importVisible = ref(false);
 
 const checkLoginStatus = () => {
-    const token = auth.getAuthToken();
-    if (!token) {
-        router.push({ name: 'Login' });
-    }
+    if (!auth.getAuthToken()) router.push({ name: 'Login' });
 };
 const handleLogout = () => {
     auth.clearAuth();
@@ -208,9 +190,7 @@ const handleDelete = async (row: Domain) => {
             await loadDomains();
         }
     } catch (error) {
-        if (error !== 'cancel') {
-            ElMessage.error('删除失败');
-        }
+        if (error !== 'cancel') ElMessage.error('删除失败');
     }
 };
 const handleDialogSubmit = async (formData: Omit<Domain, 'id' | 'created_at'>) => {
@@ -232,13 +212,9 @@ const loadDomains = async () => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) throw new Error('未登录或登录已过期');
-        const response = await fetch('/api/domains', {
-            headers: { 'Authorization': `Bearer ${authData.token}` }
-        });
+        const response = await fetch('/api/domains', { headers: { 'Authorization': `Bearer ${authData.token}` } });
         const result: GenericApiResponse<Domain[]> = await response.json();
-        if (result.status !== 200) {
-            throw new Error(result.message || '请求失败');
-        }
+        if (result.status !== 200) throw new Error(result.message || '请求失败');
         domains.value = result.data || [];
     } catch (error) {
         if (error instanceof Error) {
@@ -256,19 +232,14 @@ const calculateRemainingDays = (expiryDate: string) => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const expiry = new Date(expiryDate); expiry.setHours(0, 0, 0, 0);
     const diffTime = expiry.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays < 0 ? 0 : diffDays;
+    return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 };
 const handleConfig = () => { configVisible.value = true; };
 const handleConfigSubmit = async (config: AlertConfig) => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) throw new Error('未登录或登录已过期');
-        const response = await fetch('/api/alertconfig', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
-            body: JSON.stringify(config)
-        });
+        const response = await fetch('/api/alertconfig', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify(config) });
         const result: GenericApiResponse<AlertConfig> = await response.json();
         if (result.status === 200 && result.data) {
             ElMessage.success('配置保存成功');
@@ -278,24 +249,19 @@ const handleConfigSubmit = async (config: AlertConfig) => {
             throw new Error(result.message || '保存失败');
         }
     } catch (error) {
-        if (error instanceof Error) {
-            ElMessage.error(error.message);
-        } else {
-            ElMessage.error('保存配置失败');
-        }
+        if (error instanceof Error) ElMessage.error(error.message);
+        else ElMessage.error('保存配置失败');
     }
 };
 const loadAlertConfig = async () => {
     try {
-        const authData = auth.getAuthToken()
+        const authData = auth.getAuthToken();
         if (!authData) return;
-        const response = await fetch('/api/alertconfig', {
-            headers: { 'Authorization': `Bearer ${authData.token}` }
-        })
-        const result: GenericApiResponse<AlertConfig> = await response.json()
+        const response = await fetch('/api/alertconfig', { headers: { 'Authorization': `Bearer ${authData.token}` } });
+        const result: GenericApiResponse<AlertConfig> = await response.json();
         if (result.status === 200 && result.data) {
-            alertConfig.value = result.data
-            alertDays.value = result.data.days
+            alertConfig.value = result.data;
+            alertDays.value = result.data.days;
         }
     } catch (error) {
         console.error('获取告警配置失败:', error);
@@ -305,17 +271,9 @@ const checkDomainStatus = async (domain: string): Promise<string> => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) throw new Error('未登录或登录已过期');
-        const response = await fetch('/api/domains/check', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
-            body: JSON.stringify({ domain })
-        });
+        const response = await fetch('/api/domains/check', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify({ domain }) });
         const result: GenericApiResponse<{ status: string }> = await response.json();
-        if (result.status === 200 && result.data) {
-            return result.data.status;
-        } else {
-            return '离线';
-        }
+        return (result.status === 200 && result.data) ? result.data.status : '离线';
     } catch (error) {
         console.error(`检查域名 ${domain} 状态失败:`, error);
         return '离线';
@@ -324,17 +282,10 @@ const checkDomainStatus = async (domain: string): Promise<string> => {
 const updateDomainStatus = async (domain: string, status: string): Promise<Domain> => {
     const authData = auth.getAuthToken();
     if (!authData) throw new Error('未登录或登录已过期');
-    const response = await fetch('/api/domains/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
-        body: JSON.stringify({ domain, status })
-    });
+    const response = await fetch('/api/domains/status', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify({ domain, status }) });
     const result: GenericApiResponse<Domain> = await response.json();
-    if (result.status === 200 && result.data) {
-        return result.data;
-    } else {
-        throw new Error(result.message || '更新状态失败或返回数据为空');
-    }
+    if (result.status === 200 && result.data) return result.data;
+    throw new Error(result.message || '更新状态失败或返回数据为空');
 };
 const handleRefresh = async () => {
     if (refreshing.value) return;
@@ -350,15 +301,11 @@ const handleRefresh = async () => {
                 return domain;
             }
         });
-        const updatedDomains = await Promise.all(statusChecks);
-        domains.value = updatedDomains;
+        domains.value = await Promise.all(statusChecks);
         ElMessage.success('状态刷新完成');
     } catch (error) {
-        if (error instanceof Error) {
-            ElMessage.error(error.message);
-        } else {
-            ElMessage.error('刷新状态失败');
-        }
+        if (error instanceof Error) ElMessage.error(error.message);
+        else ElMessage.error('刷新状态失败');
     } finally {
         refreshing.value = false;
     }
@@ -387,11 +334,8 @@ const handleExport = async () => {
         document.body.removeChild(a);
         ElMessage.success('导出成功');
     } catch (error) {
-        if (error instanceof Error) {
-            ElMessage.error(error.message);
-        } else {
-            ElMessage.error('导出失败');
-        }
+        if (error instanceof Error) ElMessage.error(error.message);
+        else ElMessage.error('导出失败');
     }
 };
 
@@ -421,7 +365,6 @@ onMounted(() => {
     background-clip: text;
     color: transparent;
     animation: gradientFlow 5s linear infinite;
-    /* 清晰的描边 */
     -webkit-text-stroke: 1px rgba(0, 0, 0, 0.1);
 }
 
@@ -435,6 +378,11 @@ onMounted(() => {
     z-index: 5 !important;
     pointer-events: none !important;
 }
+
+.dark { /* 确保暗黑模式下 Element Plus 弹窗背景也是透明的 */
+    --el-bg-color: transparent !important;
+    --el-bg-color-overlay: transparent !important;
+}
 </style>
 
 <style scoped>
@@ -443,12 +391,17 @@ onMounted(() => {
     min-height: 100vh;
     box-sizing: border-box;
     padding: 20px;
-    background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg'); /* 固定一张好看的背景图 */
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
     position: relative;
-    overflow-x: hidden; /* 防止横向滚动条 */
+    overflow-x: hidden;
+    /* 核心修复：定义基础背景图 */
+    background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg');
+}
+.home-container.dark-mode {
+    /* 核心修复：暗黑模式使用不同的背景图，以看到切换效果 */
+    background-image: url('https://w.wallhaven.cc/full/zy/wallhaven-zyxvry.jpg');
 }
 
 /* 颜色遮罩层 */
@@ -461,28 +414,27 @@ onMounted(() => {
     transition: background-color 0.5s ease;
 }
 .home-container.dark-mode::before {
-    background-color: rgba(0, 0, 0, 0.5); /* 暗色模式加深遮罩 */
+    background-color: rgba(0, 0, 0, 0.4); /* 暗色模式加深遮罩 */
 }
 
-/* --- 透明磨砂玻璃面板 (终极版) --- */
+/* --- 透明磨砂玻璃面板 (最终版) --- */
 .header, .custom-table, .footer {
     position: relative;
     z-index: 10;
-    background-color: rgba(255, 255, 255, 0.25); /* 半透明白色背景 */
+    background-color: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 12px;
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-    margin: 0 auto 20px auto; /* 居中并添加底部间距 */
-    max-width: 1600px; /* 限制最大宽度，在大屏上更好看 */
-    color: #333; /* 默认深色文字 */
-    transition: background-color 0.5s, border-color 0.5s, color 0.5s;
+    margin: 0 auto 20px auto;
+    max-width: 1600px;
+    transition: background-color 0.5s, border-color 0.5s;
+    color: #fff; /* 默认使用白色文字 */
 }
 .dark-mode .header, .dark-mode .custom-table, .dark-mode .footer {
     background-color: rgba(20, 20, 20, 0.3);
     border-color: rgba(255, 255, 255, 0.2);
-    color: #e0e0e0; /* 暗黑模式浅色文字 */
 }
 
 /* --- 元素样式 --- */
@@ -490,15 +442,18 @@ onMounted(() => {
     display: flex; flex-wrap: wrap; gap: 15px;
     align-items: center; justify-content: space-between; padding: 5px 20px;
 }
-.dark-mode .neon-title { /* 暗黑模式下让标题更亮 */
+.neon-title {
+    text-shadow: 0 0 8px rgba(0,0,0,0.3); /* 让标题有立体感 */
+}
+.dark-mode .neon-title {
     -webkit-text-stroke: 0px;
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 /* 表格样式 */
 .custom-table {
     padding: 10px;
-    --el-table-border-color: rgba(0,0,0,0.1);
+    --el-table-border-color: rgba(255,255,255,0.3);
 }
 .dark-mode .custom-table {
     --el-table-border-color: rgba(255,255,255,0.2);
@@ -510,34 +465,35 @@ onMounted(() => {
 :deep(.el-table td) {
     background-color: transparent !important;
     color: inherit !important;
-    /* 核心：为所有表格文字添加阴影，确保可读性 */
-    text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
-}
-.dark-mode :deep(.el-table td) {
-    text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
 }
 :deep(.el-table th) {
     font-weight: bold;
-    text-shadow: none; /* 表头不需要阴影 */
+    color: #fff !important;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5); /* 表头文字也加阴影 */
+}
+:deep(.el-table td) {
+    /* 核心修复：这就是您要的文字发光效果 */
+    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+}
+.dark-mode :deep(.el-table td) {
+    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
 }
 :deep(.el-table__row:hover td) {
-    background-color: rgba(255, 255, 255, 0.2) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
 }
 .dark-mode :deep(.el-table__row:hover td) {
-    background-color: rgba(0, 0, 0, 0.2) !important;
+    background-color: rgba(0, 0, 0, 0.1) !important;
 }
 
-/* 链接和状态文本，使用更强的对比色 */
-.link { color: #0056b3; font-weight: bold; }
-.dark-mode .link { color: #90caf9; }
+/* 链接和状态文本 */
+.link { color: #fff; font-weight: bold; }
+.dark-mode .link { color: #9ecaff; }
 .link:hover { text-decoration: underline; }
 
-.warning-text { color: #b95000; font-weight: bold; }
-.dark-mode .warning-text { color: #ffca28; }
-.success-text { color: #1e8e3e; font-weight: bold; }
-.dark-mode .success-text { color: #a5d6a7; }
-.danger-text { color: #c93333; font-weight: bold; }
-.dark-mode .danger-text { color: #ef9a9a; }
+.warning-text, .success-text, .danger-text { font-weight: bold; }
+.warning-text { color: #ffc107; }
+.success-text { color: #98ff98; }
+.danger-text { color: #ff8a80; }
 
 /* 页脚 */
 .footer {
