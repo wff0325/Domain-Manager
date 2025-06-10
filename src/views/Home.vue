@@ -1,7 +1,8 @@
 <template>
     <div class="home-container" :class="{ 'dark-mode': isDarkMode }">
         <div class="header">
-            <h2>域名管理系统(Domains-Support)</h2>
+            <!-- 核心改动：为 h2 添加了新的 class 和 data-text 属性 -->
+            <h2 class="neon-title" data-text="域名管理系统(Domains-Support)">域名管理系统(Domains-Support)</h2>
             <div class="header-buttons">
                 <el-button type="primary" size="small" :icon="Refresh" :loading="refreshing"
                     @click="handleRefresh">刷新</el-button>
@@ -519,397 +520,133 @@ onMounted(() => {
 })
 </script>
 
+<!-- 全局样式和动画 -->
+<style>
+/* 1. RGB标题动画 */
+.neon-title {
+    /* 使用我们在 index.html 中引入的字体 */
+    font-family: 'ZCOOL KuaiLe', cursive;
+    font-weight: normal;
+    font-size: 2rem; /* 调整大小以适应您的 Header */
+    position: relative;
+    color: transparent;
+    -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.5);
+    filter: drop-shadow(0 0 5px rgba(0, 230, 230, 0.5));
+    padding: 10px 0;
+}
+
+.neon-title::before {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientFlow 5s linear infinite;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 2. 修正 Element Plus 在透明背景下的样式 */
+.dark {
+    --el-bg-color: transparent;
+    --el-bg-color-overlay: transparent;
+}
+</style>
+
+<!-- 组件作用域样式 -->
 <style scoped>
+/* --- 背景和布局 --- */
 .home-container {
     min-height: 100vh;
     padding: 20px;
     padding-bottom: 80px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
-    transition: background 0.3s ease;
+    /* 核心：动漫背景图 + 固定 + 覆盖 */
+    background-image: url('https://wp.upx8.com/api.php?content=%E5%8A%A8%E6%BC%AB');
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    transition: background-image 1s ease-in-out;
 }
-
 .home-container.dark-mode {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    color: #ffffff;
+    /* 暗黑模式可以换一张，或者用同一张 */
+    background-image: url('https://w.wallhaven.cc/full/6d/wallhaven-6dweo7.jpg');
 }
 
+/* --- 透明磨砂玻璃面板效果 --- */
+.header, .custom-table, .footer {
+    background-color: rgba(0, 0, 0, 0.25); /* 半透明背景 */
+    backdrop-filter: blur(10px); /* 核心：背景模糊，磨砂效果 */
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+.dark-mode .header, .dark-mode .custom-table, .dark-mode .footer {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- 元素样式调整以适应新背景 --- */
 .header {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 20px;
-    align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
+    align-items: center; justify-content: space-between; padding: 5px 20px;
 }
 
-.dark-mode .header {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    color: #ffffff;
-}
-
-.header h2 {
+.header h2 { /* h2 现在由 .neon-title 控制 */
     margin: 0;
-    color: #1976D2;
-    font-size: 24px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
 }
+.header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-.dark-mode .header h2 {
-    color: #64B5F6;
-}
-
-.header-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-}
-
-.theme-switch {
-    margin-left: 4px;
-}
-
+/* 使表格完全透明 */
 .custom-table {
-    margin-bottom: 60px;
-    overflow-x: auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    margin-bottom: 60px; overflow-x: auto;
+}
+:deep(.el-table),
+:deep(.el-table__expanded-cell) {
+    background-color: transparent !important;
+}
+:deep(.el-table th),
+:deep(.el-table tr),
+:deep(.el-table td) {
+    background-color: transparent !important;
+    color: #fff !important; /* 文字改为白色以看清 */
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+:deep(.el-table__row:hover td) { /* 鼠标悬停行 */
+    background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-.dark-mode .custom-table {
-    background: #2d2d2d;
-    color: #ffffff;
-}
+/* 调整链接和状态文本颜色，并添加阴影以提高可读性 */
+.link { color: #82b1ff; text-decoration: none; transition: color 0.3s; text-shadow: 1px 1px 2px #000; }
+.link:hover { color: #c8e6c9; text-decoration: underline; }
 
-:deep(.el-table) {
-    width: 100% !important;
-    white-space: nowrap;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
+.warning-text { color: #ffe57f; font-weight: bold; text-shadow: 1px 1px 2px #000; }
+.success-text { color: #b9f6ca; font-weight: bold; text-shadow: 1px 1px 2px #000; }
+.danger-text { color: #ffcdd2; font-weight: bold; text-shadow: 1px 1px 2px #000; }
 
-.dark-mode :deep(.el-table) {
-    --el-table-border-color: #404040;
-    --el-table-header-bg-color: #2d2d2d;
-    --el-table-row-hover-bg-color: #404040;
-    --el-table-current-row-bg-color: #404040;
-    --el-table-header-text-color: #ffffff;
-    --el-table-text-color: #ffffff;
-    --el-table-bg-color: #2d2d2d;
-}
 
-.link {
-    color: #409EFF;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-
-.link:hover {
-    color: #66b1ff;
-    text-decoration: underline;
-}
-
-.warning-text {
-    color: #E6A23C;
-    font-weight: bold;
-}
-
-.success-text {
-    color: #67C23A;
-    font-weight: bold;
-}
-
-.danger-text {
-    color: #F56C6C;
-    font-weight: bold;
-}
-
-:deep(.el-table th) {
-    background-color: #f5f7fa !important;
-}
-
-.dark-mode :deep(.el-table th) {
-    background-color: #2d2d2d !important;
-    color: #ffffff !important;
-    font-weight: bold;
-}
-
-:deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
-    background-color: #fafafa;
-}
-
-.dark-mode :deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
-    background-color: #333333;
-}
-
-.el-button {
-    border-radius: 4px;
-}
-
-/* 添加图标的过渡效果 */
-.el-icon {
-    margin-right: 4px;
-    transition: transform 0.3s;
-}
-
-.el-button:hover .el-icon {
-    transform: rotate(180deg);
-}
-
-.header-buttons .el-button {
-    min-width: 88px;
-    transition: all 0.3s;
-}
-
-.header-buttons .el-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.header-buttons .el-button [class*="el-icon"] {
-    margin-right: 4px;
-    transition: transform 0.3s;
-}
-
-.header-buttons .el-button:not(.is-loading):hover [class*="el-icon"] {
-    transform: rotate(180deg);
-}
-
-/* 表格中的按钮样式 */
-.el-table .el-button {
-    transition: all 0.3s;
-}
-
-.el-table .el-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.el-table .el-button [class*="el-icon"] {
-    margin-right: 4px;
-}
-
-/* 加载状态的特殊样式 */
-.el-button.is-loading {
-    opacity: 0.8;
-    cursor: not-allowed;
-}
-
-.el-button.is-loading [class*="el-icon"] {
-    animation: none;
-}
-
+/* --- 页脚样式 --- */
 .footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 16px;
-    background: white;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+    position: fixed; bottom: 0; left: 0; right: 0; padding: 16px;
+    color: #eee;
+    text-shadow: 1px 1px 2px #000;
 }
-
-.dark-mode .footer {
-    background: #2d2d2d;
-    color: #ffffff;
-}
-
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    text-align: center;
-}
-
-.copyright {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    font-size: 14px;
-}
-
-.separator {
-    color: #dcdfe6;
-    margin: 0 2px;
-}
-
-.social-links {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-.social-link {
-    color: #606266;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    padding: 2px;
-}
-
-.social-link:hover {
-    color: #409EFF;
-    transform: translateY(-2px);
-}
-
-.social-icon {
-    width: 20px;
-    height: 20px;
-}
-
-@media (max-width: 768px) {
-    .home-container {
-        padding: 15px;
-        padding-bottom: 70px;
-    }
-
-    .header {
-        padding: 12px;
-        margin-bottom: 12px;
-    }
-
-    .header h2 {
-        font-size: 1.2rem;
-    }
-
-    .custom-table {
-        margin-bottom: 15px;
-    }
-
-    .footer {
-        padding: 10px;
-        height: auto;
-        min-height: 50px;
-    }
-
-    .footer-content {
-        flex-direction: column;
-        gap: 8px;
-        text-align: center;
-    }
-
-    .copyright {
-        font-size: 0.8rem;
-        gap: 6px;
-    }
-
-    .social-links {
-        gap: 10px;
-    }
-
-    .social-icon {
-        width: 16px;
-        height: 16px;
-    }
-
-    :deep(.el-table) {
-        font-size: 0.9rem;
-    }
-
-    :deep(.el-table th),
-    :deep(.el-table td) {
-        padding: 8px 4px;
-    }
-
-    :deep(.el-button) {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .home-container {
-        padding: 10px;
-        padding-bottom: 60px;
-    }
-
-    .header {
-        padding: 10px;
-    }
-
-    .header-buttons {
-        gap: 5px;
-    }
-
-    .footer {
-        padding: 8px;
-        min-height: 45px;
-    }
-
-    .copyright {
-        font-size: 0.75rem;
-    }
-}
-</style>
-
-<style>
-/* 全局暗黑模式样式 */
-.dark {
-    --el-bg-color: #1a1a1a;
-    --el-bg-color-overlay: #2d2d2d;
-    --el-text-color-primary: #ffffff;
-    --el-text-color-regular: #e0e0e0;
-    --el-border-color: #404040;
-    --el-border-color-light: #404040;
-    --el-border-color-lighter: #404040;
-    --el-border-color-extra-light: #404040;
-    --el-fill-color-blank: #2d2d2d;
-    --el-mask-color: rgba(0, 0, 0, 0.8);
-}
-
-.dark .el-dialog {
-    --el-dialog-bg-color: #2d2d2d;
-    --el-dialog-title-font-color: #ffffff;
-}
-
-.dark .el-card {
-    --el-card-bg-color: #2d2d2d;
-}
-
-/* 移除按钮的暗黑模式样式 */
-.dark .el-button {
-    --el-button-bg-color: var(--el-color-primary);
-    --el-button-border-color: var(--el-color-primary);
-    --el-button-hover-bg-color: var(--el-color-primary-light-3);
-    --el-button-hover-border-color: var(--el-color-primary-light-3);
-}
-
-.dark .el-button--danger {
-    --el-button-bg-color: var(--el-color-danger);
-    --el-button-border-color: var(--el-color-danger);
-    --el-button-hover-bg-color: var(--el-color-danger-light-3);
-    --el-button-hover-border-color: var(--el-color-danger-light-3);
-}
-
-.dark .el-input {
-    --el-input-bg-color: #2d2d2d;
-    --el-input-text-color: #ffffff;
-    --el-input-border-color: #404040;
-}
-
-.dark .el-select {
-    --el-select-border-color-hover: #505050;
-    --el-select-input-focus-border-color: #505050;
-}
-
-.el-button.el-button--small {
-    padding: 6px 12px;
-    /* 默认是 8px 15px */
-    font-size: 12px;
-    /* 默认是 13px */
-}
+.footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; text-align: center; }
+.copyright { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 14px; }
+.separator { color: #dcdfe6; margin: 0 2px; }
+.social-links { display: flex; gap: 15px; align-items: center; }
+.social-link { color: #eee; transition: all 0.3s ease; }
+.social-link:hover { color: #82b1ff; transform: translateY(-2px); }
+.social-icon { width: 20px; height: 20px; }
 </style>
