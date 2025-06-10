@@ -148,7 +148,7 @@ const applySettings = () => {
 };
 
 const setAccentColor = (color: string) => { accentColor.value = color; };
-const panelStyleClass = computed(() => panel-style-${panelStyle.value});
+const panelStyleClass = computed(() => `panel-style-${panelStyle.value}`);
 
 onMounted(() => {
     applySettings();
@@ -206,7 +206,7 @@ const loadDomains = async () => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) throw new Error('未登录或登录已过期');
-        const response = await fetch('/api/domains', { headers: { 'Authorization': Bearer ${authData.token} } });
+        const response = await fetch('/api/domains', { headers: { 'Authorization': `Bearer ${authData.token}` } });
         if (!response.ok) {
             const errorData = await response.json() as { message: string };
             throw new Error(errorData.message || '请求失败');
@@ -232,7 +232,7 @@ const handleConfigSubmit = async (config: AlertConfig) => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) throw new Error('未登录或登录已过期');
-        const response = await fetch('/api/alertconfig', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': Bearer ${authData.token} }, body: JSON.stringify(config) });
+        const response = await fetch('/api/alertconfig', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify(config) });
         const result = await response.json() as ApiResponse;
         if (result.status !== 200) throw new Error(result.message || '保存失败');
         ElMessage.success('配置保存成功');
@@ -254,7 +254,7 @@ const handleRefresh = async () => {
             try {
                 const authData = auth.getAuthToken();
                 if (!authData) throw new Error('未授权');
-                const response = await fetch('/api/domains/check', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': Bearer ${authData.token} }, body: JSON.stringify({ domain }) });
+                const response = await fetch('/api/domains/check', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify({ domain }) });
                 const result = await response.json() as ApiResponse<{ status: string }>;
                 return result.status === 200 && result.data ? result.data.status : '离线';
             } catch { return '离线'; }
@@ -262,7 +262,7 @@ const handleRefresh = async () => {
         const updateDomainStatus = async (domain: string, status: string): Promise<DomainData> => {
             const authData = auth.getAuthToken();
             if (!authData) throw new Error('未授权');
-            const response = await fetch('/api/domains/status', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': Bearer ${authData.token} }, body: JSON.stringify({ domain, status }) });
+            const response = await fetch('/api/domains/status', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify({ domain, status }) });
             const result = await response.json() as ApiResponse<DomainData>;
             if (result.status === 200 && result.data) return result.data;
             throw new Error(result.message || '更新失败');
@@ -284,7 +284,7 @@ const loadAlertConfig = async () => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) return;
-        const response = await fetch('/api/alertconfig', { headers: { 'Authorization': Bearer ${authData.token} } });
+        const response = await fetch('/api/alertconfig', { headers: { 'Authorization': `Bearer ${authData.token}` } });
         const result = await response.json() as ApiResponse<AlertConfig>;
         if (result.status === 200 && result.data) {
             alertConfig.value = result.data;
@@ -298,12 +298,12 @@ const handleExport = async () => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) throw new Error('未登录或登录已过期');
-        const response = await fetch('/api/domains/export', { headers: { 'Authorization': Bearer ${authData.token} } });
+        const response = await fetch('/api/domains/export', { headers: { 'Authorization': `Bearer ${authData.token}` } });
         if (!response.ok) {
             const errorData = await response.json() as { message: string };
             throw new Error(errorData.message || '导出失败');
         }
-        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || domains-export.json;
+        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `domains-export.json`;
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
