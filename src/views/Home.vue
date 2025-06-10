@@ -31,7 +31,10 @@
                     <el-button type="primary" size="small" :icon="SwitchButton" @click="handleLogout">登出</el-button>
                 </el-tooltip>
 
-                <!-- 主题切换下拉菜单 -->
+                <!-- 
+                  关键部分: 主题切换下拉菜单。
+                  如果这个部分不显示，请务必检查依赖安装和浏览器控制台错误。
+                -->
                 <el-dropdown trigger="click" @command="handleThemeChange">
                     <el-tooltip :content="`当前主题: ${themeLabels[theme]}`" placement="bottom">
                         <el-button type="primary" size="small" :icon="currentThemeIcon" />
@@ -48,6 +51,7 @@
             </div>
         </div>
 
+        <!-- ... 表格和页脚代码保持不变 ... -->
         <el-table :data="domains" border style="width: 100%" class="custom-table">
             <el-table-column label="域名" align="center" sortable>
                 <template #default="scope">
@@ -126,6 +130,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+// 关键部分: 确保 Monitor 图标已从 @element-plus/icons-vue 导入
 import { Setting, Refresh, Plus, Edit, Delete, SwitchButton, Sunny, Moon, ArrowDown, Upload, Download, Monitor } from '@element-plus/icons-vue'
 import { useAuth } from '../utils/auth'
 import DomainDialog from '../components/DomainDialog.vue'
@@ -148,7 +153,6 @@ interface ApiResponse<T = any> {
     data: T
 }
 
-// A simple interface for expected error responses from the API
 interface ApiErrorResponse {
     message?: string
 }
@@ -198,257 +202,23 @@ const onPrefersColorSchemeChange = () => {
     }
 }
 
-const checkLoginStatus = () => {
-    if (!auth.getAuthToken()) {
-        router.push({ name: 'Login' })
-    }
-}
-
-const handleLogout = () => {
-    auth.clearAuth()
-    router.push({ name: 'Login' })
-}
-
-const handleAdd = () => {
-    isEdit.value = false
-    editData.value = undefined
-    dialogVisible.value = true
-}
-
-const handleEdit = (row: Domain) => {
-    isEdit.value = true
-    editData.value = row
-    dialogVisible.value = true
-}
-
-const handleDelete = async (row: Domain) => {
-    try {
-        await ElMessageBox.confirm('确定要删除该域名吗？', '提示', { type: 'warning' })
-        if (row.id) {
-            await deleteDomain(row.id)
-            ElMessage.success('删除成功')
-            await loadDomains()
-        }
-    } catch (error) {
-        if (error !== 'cancel') {
-            ElMessage.error('删除失败')
-        }
-    }
-}
-
-const handleDialogSubmit = async (formData: Omit<Domain, 'id' | 'created_at'>) => {
-    try {
-        if (isEdit.value && editData.value?.id) {
-            await updateDomain(editData.value.id, formData)
-            ElMessage.success('修改成功')
-        } else {
-            await createDomain(formData)
-            ElMessage.success('添加成功')
-        }
-        dialogVisible.value = false
-        await loadDomains()
-    } catch (error: any) {
-        const message = error?.response?.data?.message || (isEdit.value ? '修改失败' : '添加失败')
-        ElMessage.error(message)
-    }
-}
-
-const loadDomains = async () => {
-    try {
-        const authData = auth.getAuthToken()
-        if (!authData) throw new Error('未登录或登录已过期')
-        
-        const response = await fetch('/api/domains', {
-            headers: { 'Authorization': `Bearer ${authData.token}` }
-        })
-        if (!response.ok) throw new Error('请求域名列表失败')
-        
-        const result: ApiResponse<Domain[]> = await response.json()
-        if (result.status !== 200) throw new Error(result.message || '获取数据失败')
-        
-        domains.value = result.data || []
-    } catch (error) {
-        if (error instanceof Error) {
-            ElMessage.error(error.message || '加载域名列表失败')
-            if (error.message.includes('未登录') || error.message.includes('过期')) {
-                auth.clearAuth();
-                router.push({ name: 'Login' });
-            }
-        } else {
-            ElMessage.error('加载域名列表时发生未知错误')
-        }
-    }
-}
-
-const calculateRemainingDays = (expiryDate: string) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const expiry = new Date(expiryDate);
-    expiry.setHours(0, 0, 0, 0);
-    const diffTime = expiry.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays < 0 ? 0 : diffDays;
-}
-
+// ... 省略其他不变的函数 ...
+const checkLoginStatus = () => { if (!auth.getAuthToken()) { router.push({ name: 'Login' }) } }
+const handleLogout = () => { auth.clearAuth(); router.push({ name: 'Login' }) }
+const handleAdd = () => { isEdit.value = false; editData.value = undefined; dialogVisible.value = true; }
+const handleEdit = (row: Domain) => { isEdit.value = true; editData.value = row; dialogVisible.value = true; }
+const handleDelete = async (row: Domain) => { try { await ElMessageBox.confirm('确定要删除该域名吗？', '提示', { type: 'warning' }); if (row.id) { await deleteDomain(row.id); ElMessage.success('删除成功'); await loadDomains(); } } catch (error) { if (error !== 'cancel') { ElMessage.error('删除失败'); } } }
+const handleDialogSubmit = async (formData: Omit<Domain, 'id' | 'created_at'>) => { try { if (isEdit.value && editData.value?.id) { await updateDomain(editData.value.id, formData); ElMessage.success('修改成功'); } else { await createDomain(formData); ElMessage.success('添加成功'); } dialogVisible.value = false; await loadDomains(); } catch (error: any) { const message = error?.response?.data?.message || (isEdit.value ? '修改失败' : '添加失败'); ElMessage.error(message); } }
+const loadDomains = async () => { try { const authData = auth.getAuthToken(); if (!authData) throw new Error('未登录或登录已过期'); const response = await fetch('/api/domains', { headers: { 'Authorization': `Bearer ${authData.token}` } }); if (!response.ok) throw new Error('请求域名列表失败'); const result: ApiResponse<Domain[]> = await response.json(); if (result.status !== 200) throw new Error(result.message || '获取数据失败'); domains.value = result.data || []; } catch (error) { if (error instanceof Error) { ElMessage.error(error.message || '加载域名列表失败'); if (error.message.includes('未登录') || error.message.includes('过期')) { auth.clearAuth(); router.push({ name: 'Login' }); } } else { ElMessage.error('加载域名列表时发生未知错误'); } } }
+const calculateRemainingDays = (expiryDate: string) => { const today = new Date(); today.setHours(0, 0, 0, 0); const expiry = new Date(expiryDate); expiry.setHours(0, 0, 0, 0); const diffTime = expiry.getTime() - today.getTime(); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); return diffDays < 0 ? 0 : diffDays; }
 const handleConfig = () => { configVisible.value = true; }
-
-const handleConfigSubmit = async (config: AlertConfig) => {
-    try {
-        const authData = auth.getAuthToken()
-        if (!authData) throw new Error('未授权')
-        
-        const response = await fetch('/api/alertconfig', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
-            body: JSON.stringify(config)
-        })
-        const result: ApiResponse<AlertConfig> = await response.json()
-        
-        if (result.status === 200) {
-            ElMessage.success('配置保存成功')
-            alertDays.value = config.days
-            alertConfig.value = config
-            configVisible.value = false
-        } else {
-            throw new Error(result.message || '保存失败')
-        }
-    } catch (error) {
-         if (error instanceof Error) {
-            ElMessage.error(error.message || '保存配置失败');
-        } else {
-            ElMessage.error('保存配置时发生未知错误');
-        }
-    }
-}
-
-const updateDomainStatus = async (domain: string, status: string): Promise<Domain> => {
-    const authData = auth.getAuthToken()
-    if (!authData) throw new Error('未授权')
-    
-    const response = await fetch('/api/domains/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
-        body: JSON.stringify({ domain, status })
-    })
-    
-    const result: ApiResponse<Domain> = await response.json()
-    if (result.status === 200) return result.data;
-    throw new Error(result.message || '更新状态失败');
-}
-
-const checkDomainStatus = async (domain: string): Promise<string> => {
-    try {
-        const authData = auth.getAuthToken()
-        if (!authData) throw new Error('未授权')
-        
-        const response = await fetch('/api/domains/check', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
-            body: JSON.stringify({ domain })
-        })
-        
-        const result: ApiResponse<{ status: string }> = await response.json()
-        return result.status === 200 ? result.data.status : '离线';
-    } catch (error) {
-        console.error(`检查域名 ${domain} 状态失败:`, error);
-        return '离线'
-    }
-}
-
-const handleRefresh = async () => {
-    if (refreshing.value) return;
-    try {
-        refreshing.value = true
-        ElMessage.info('正在检查域名状态...');
-        
-        const results = await Promise.allSettled(
-            domains.value.map(async (domain) => {
-                const status = await checkDomainStatus(domain.domain)
-                if (status !== domain.status) {
-                    await updateDomainStatus(domain.domain, status)
-                }
-            })
-        )
-
-        const failedCount = results.filter(r => r.status === 'rejected').length;
-        if (failedCount > 0) {
-             ElMessage.warning(`${failedCount} 个域名状态检查失败，请稍后重试。`);
-        } else {
-            ElMessage.success('状态刷新完成')
-        }
-        await loadDomains();
-    } catch (error) {
-        if (error instanceof Error) {
-            ElMessage.error(error.message || '刷新状态失败')
-        } else {
-            ElMessage.error('刷新状态时发生未知错误')
-        }
-    } finally {
-        refreshing.value = false
-    }
-}
-
-const loadAlertConfig = async () => {
-    try {
-        const authData = auth.getAuthToken()
-        if (!authData) return;
-        
-        const response = await fetch('/api/alertconfig', {
-            headers: { 'Authorization': `Bearer ${authData.token}` }
-        })
-        const result: ApiResponse<AlertConfig> = await response.json();
-        
-        if (result.status === 200 && result.data) {
-            alertConfig.value = result.data
-            alertDays.value = result.data.days
-        }
-    } catch (error) {
-        console.error('获取告警配置失败:', error)
-    }
-}
-
+const handleConfigSubmit = async (config: AlertConfig) => { try { const authData = auth.getAuthToken(); if (!authData) throw new Error('未授权'); const response = await fetch('/api/alertconfig', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify(config) }); const result: ApiResponse<AlertConfig> = await response.json(); if (result.status === 200) { ElMessage.success('配置保存成功'); alertDays.value = config.days; alertConfig.value = config; configVisible.value = false; } else { throw new Error(result.message || '保存失败'); } } catch (error) { if (error instanceof Error) { ElMessage.error(error.message || '保存配置失败'); } else { ElMessage.error('保存配置时发生未知错误'); } } }
+const updateDomainStatus = async (domain: string, status: string): Promise<Domain> => { const authData = auth.getAuthToken(); if (!authData) throw new Error('未授权'); const response = await fetch('/api/domains/status', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify({ domain, status }) }); const result: ApiResponse<Domain> = await response.json(); if (result.status === 200) return result.data; throw new Error(result.message || '更新状态失败'); }
+const checkDomainStatus = async (domain: string): Promise<string> => { try { const authData = auth.getAuthToken(); if (!authData) throw new Error('未授权'); const response = await fetch('/api/domains/check', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify({ domain }) }); const result: ApiResponse<{ status: string }> = await response.json(); return result.status === 200 ? result.data.status : '离线'; } catch (error) { console.error(`检查域名 ${domain} 状态失败:`, error); return '离线' } }
+const handleRefresh = async () => { if (refreshing.value) return; try { refreshing.value = true; ElMessage.info('正在检查域名状态...'); const results = await Promise.allSettled(domains.value.map(async (domain) => { const status = await checkDomainStatus(domain.domain); if (status !== domain.status) { await updateDomainStatus(domain.domain, status); } })); const failedCount = results.filter(r => r.status === 'rejected').length; if (failedCount > 0) { ElMessage.warning(`${failedCount} 个域名状态检查失败，请稍后重试。`); } else { ElMessage.success('状态刷新完成'); } await loadDomains(); } catch (error) { if (error instanceof Error) { ElMessage.error(error.message || '刷新状态失败'); } else { ElMessage.error('刷新状态时发生未知错误'); } } finally { refreshing.value = false; } }
+const loadAlertConfig = async () => { try { const authData = auth.getAuthToken(); if (!authData) return; const response = await fetch('/api/alertconfig', { headers: { 'Authorization': `Bearer ${authData.token}` } }); const result: ApiResponse<AlertConfig> = await response.json(); if (result.status === 200 && result.data) { alertConfig.value = result.data; alertDays.value = result.data.days; } } catch (error) { console.error('获取告警配置失败:', error); } }
 const handleImport = () => { importVisible.value = true; }
-
-const handleExport = async () => {
-    try {
-        const authData = auth.getAuthToken()
-        if (!authData) throw new Error('未授权')
-
-        const loading = ElMessage.info({ message: '正在准备导出数据...', duration: 0 })
-
-        const response = await fetch('/api/domains/export', {
-            headers: { 'Authorization': `Bearer ${authData.token}` }
-        })
-
-        loading.close()
-        
-        if (!response.ok) {
-            // FIX: Assert the type of the parsed JSON error response
-            const errorData = await response.json() as ApiErrorResponse
-            throw new Error(errorData.message || '导出失败')
-        }
-
-        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `domains-export-${new Date().toISOString().split('T')[0]}.json`;
-        
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = filename
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-        
-        ElMessage.success('导出成功')
-    } catch (error) {
-        if (error instanceof Error) {
-            ElMessage.error(error.message || '导出失败');
-        } else {
-            ElMessage.error('导出时发生未知错误');
-        }
-    }
-}
+const handleExport = async () => { try { const authData = auth.getAuthToken(); if (!authData) throw new Error('未授权'); const loading = ElMessage.info({ message: '正在准备导出数据...', duration: 0 }); const response = await fetch('/api/domains/export', { headers: { 'Authorization': `Bearer ${authData.token}` } }); loading.close(); if (!response.ok) { const errorData = await response.json() as ApiErrorResponse; throw new Error(errorData.message || '导出失败'); } const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `domains-export-${new Date().toISOString().split('T')[0]}.json`; const blob = await response.blob(); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); document.body.removeChild(a); ElMessage.success('导出成功'); } catch (error) { if (error instanceof Error) { ElMessage.error(error.message || '导出失败'); } else { ElMessage.error('导出时发生未知错误'); } } }
 
 onMounted(() => {
     checkLoginStatus()
@@ -465,6 +235,7 @@ onUnmounted(() => {
 </script>
 
 <style>
+/* 全局样式 */
 .neon-title {
     font-family: 'ZCOOL KuaiLe', cursive;
     font-weight: normal;
@@ -494,6 +265,7 @@ onUnmounted(() => {
 </style>
 
 <style scoped>
+/* Scoped样式 */
 .home-container {
     min-height: 100vh;
     box-sizing: border-box;
