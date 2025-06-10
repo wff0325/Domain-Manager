@@ -1,7 +1,7 @@
 <template>
     <div class="home-container" :class="[isDarkMode ? 'dark' : 'light', panelStyleClass]">
         <div class="header">
-            <h2 class="neon-title" data-text="域名管理系统(Domains-Support)">域名管理系统(Domains-Support)</h2>
+            <h2 class="neon-title" data-text="域名管理系统(Domain-Manager)">域名管理系统(Domain-Manager)</h2>
             <div class="header-buttons">
                 <el-button type="primary" size="small" :icon="Refresh" :loading="refreshing"
                     @click="handleRefresh">刷新</el-button>
@@ -118,9 +118,9 @@
 
         <footer class="footer">
             <div class="footer-content">
-                <span>© 2025 Domains-Support v1.0.5</span>
+                <span>© 2025 Domain-Manager v1.0.5</span>
                 <!-- 请将下面的 href 替换为您的实际链接 -->
-                <a href="https://github.com/dafengzi" target="_blank" class="link footer-link">
+                <a href="https://github.com/wff0325/Domain-Manager/tree/main" target="_blank" class="link footer-link">
                     <IconGithub class="footer-icon" />
                     <span>作者: 大疯子</span>
                 </a>
