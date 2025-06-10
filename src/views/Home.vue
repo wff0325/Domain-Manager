@@ -126,7 +126,7 @@ const settingsDrawerVisible = ref(false);
 const theme = ref(localStorage.getItem('theme') || 'system');
 const accentColor = ref(localStorage.getItem('accentColor') || '#409EFF');
 const panelStyle = ref(localStorage.getItem('panelStyle') || 'misty');
-const isDarkMode = ref(false); // Used for .home-container's own :class binding
+const isDarkMode = ref(false); 
 
 const accentColors = ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#909399'];
 
@@ -141,10 +141,9 @@ const applySettings = () => {
     } else {
         currentIsDark = theme.value === 'dark';
     }
-    isDarkMode.value = currentIsDark; // For .home-container :class
+    isDarkMode.value = currentIsDark; 
 
-    // Apply class to the root <html> element for global styles (Element Plus components)
-    document.documentElement.className = currentIsDark ? 'dark' : 'light'; // Explicitly set 'light' or 'dark'
+    document.documentElement.className = currentIsDark ? 'dark' : 'light'; 
     document.documentElement.style.setProperty('--el-color-primary', accentColor.value);
 };
 
@@ -159,8 +158,6 @@ onMounted(() => {
 });
 watch([theme, accentColor], applySettings, { immediate: true });
 
-
-// --- Standard Component Logic (No changes from previous correct version) ---
 const router = useRouter();
 const auth = useAuth();
 const domains = ref<DomainData[]>([]);
@@ -329,6 +326,20 @@ onMounted(() => {
 });
 </script>
 
+<style> /* GLOBAL STYLES - Placed here for Live2D Pet */
+#live2d-widget {
+    z-index: 1 !important; /* Keep pet behind most content */
+    pointer-events: none !important; /* Allow mouse events to pass through */
+}
+.neon-title { /* Moved from scoped to global if it's truly global, or keep in scoped if only for this component */
+    font-family: 'ZCOOL KuaiLe', cursive; font-weight: normal; font-size: 2.2rem; position: relative;
+    background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    background-size: 400% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: gradientFlow 5s linear infinite; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+@keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+</style>
+
 <style scoped>
 /* --- Base Container Styling --- */
 .home-container {
@@ -343,21 +354,20 @@ onMounted(() => {
 
 /* --- Light Mode Specific Background --- */
 .home-container.light {
-    background-color: #e0eafc; /* Fallback light color */
+    background-color: #e0eafc; 
     background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 }
 
 /* --- Dark Mode Specific Background --- */
 .home-container.dark {
-    background-color: #0d1b2a; /* Fallback dark color */
+    background-color: #0d1b2a; 
     background-image: url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 }
-
 
 /* --- Panel Base Styling --- */
 .header, .custom-table, .footer {
     position: relative;
-    z-index: 10;
+    z-index: 10; /* Ensure panels are above the pet model if it's at z-index 1 */
     border-radius: 12px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     margin-bottom: 20px;
@@ -373,13 +383,13 @@ onMounted(() => {
 .home-container.light .panel-style-misty .header, 
 .home-container.light .panel-style-misty .custom-table, 
 .home-container.light .panel-style-misty .footer {
-    background-color: rgba(255, 255, 255, 0.75); /* Slightly more opaque for better readability */
+    background-color: rgba(255, 255, 255, 0.75); 
     border-color: rgba(200, 200, 200, 0.4);
 }
 .home-container.dark .panel-style-misty .header, 
 .home-container.dark .panel-style-misty .custom-table, 
 .home-container.dark .panel-style-misty .footer {
-    background-color: rgba(25, 35, 45, 0.7); /* Adjusted dark misty color */
+    background-color: rgba(25, 35, 45, 0.7); 
     border-color: rgba(100, 100, 120, 0.5);
 }
 
@@ -390,16 +400,15 @@ onMounted(() => {
 .home-container.light .panel-style-solid .header, 
 .home-container.light .panel-style-solid .custom-table, 
 .home-container.light .panel-style-solid .footer {
-    background-color: #ffffff; /* Pure white for solid light panels */
+    background-color: #ffffff; 
     border-color: #d0d5dd;
 }
 .home-container.dark .panel-style-solid .header, 
 .home-container.dark .panel-style-solid .custom-table, 
 .home-container.dark .panel-style-solid .footer {
-    background-color: #1e293b; /* A common dark panel color */
+    background-color: #1e293b; 
     border-color: #334155;
 }
-
 
 /* --- Table Specific Styling (Adaptive Text Color - FINAL FIX) --- */
 :deep(.el-table), :deep(.el-table__expanded-cell) {
@@ -413,32 +422,31 @@ onMounted(() => {
 
 /* Light Theme Table Text & Borders: Targets .cell within th/td using global html.light */
 html.light :deep(.el-table th .cell),
-html.light :deep(.el-table td .cell) {
-    color: #212529 !important; /* Bootstrap's default dark text color */
+html.light :deep(.el-table td .cell) { /* This now correctly targets the text container */
+    color: #31353a !important; /* Slightly darker for better contrast on light backgrounds */
 }
-html.light :deep(.el-table th),
-html.light :deep(.el-table td) {
-    border-color: #dee2e6 !important; /* Bootstrap's default table border color */
+html.light :deep(.el-table th), /* Borders for header cells */
+html.light :deep(.el-table td) { /* Borders for data cells */
+    border-color: #e0e0e0 !important; /* Lighter border for light theme */
 }
 
 /* Dark Theme Table Text & Borders: Targets .cell within th/td using global html.dark */
 html.dark :deep(.el-table th .cell),
-html.dark :deep(.el-table td .cell) {
-    color: #f8f9fa !important; /* Bootstrap's default light text color */
+html.dark :deep(.el-table td .cell) { /* This now correctly targets the text container */
+    color: #f0f2f5 !important; /* Off-white for dark theme text */
 }
-html.dark :deep(.el-table th),
-html.dark :deep(.el-table td) {
-    border-color: #495057 !important; /* Bootstrap's dark table border color */
+html.dark :deep(.el-table th), /* Borders for header cells */
+html.dark :deep(.el-table td) { /* Borders for data cells */
+    border-color: #404a58 !important; /* Subtler border for dark theme */
 }
 
 /* Row hover effect */
 html.light :deep(.el-table__row:hover td) {
-    background-color: rgba(0, 0, 0, 0.05) !important;
+    background-color: rgba(0, 0, 0, 0.04) !important;
 }
 html.dark :deep(.el-table__row:hover td) {
-    background-color: rgba(255, 255, 255, 0.075) !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
 }
-
 
 /* --- Header & Buttons --- */
 .header { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 10px 20px; }
@@ -448,15 +456,15 @@ html.dark :deep(.el-table__row:hover td) {
 .link { color: var(--el-color-primary); text-decoration: none; font-weight: 500; }
 .link:hover { opacity: 0.8; }
 
-html.light .warning-text { color: #fd7e14 !important; font-weight: 500; }
-html.dark .warning-text { color: #ffca2c !important; font-weight: 500; }
+/* Warning, Success, Danger texts should also adapt if not using Element Plus specific classes */
+html.light .warning-text { color: #e67e22 !important; font-weight: 500; } /* A more distinct orange */
+html.dark .warning-text { color: #f39c12 !important; font-weight: 500; } /* A bright yellow/orange for dark */
 
-html.light .success-text { color: #198754; font-weight: 500; }
-html.dark .success-text { color: #20c997; font-weight: 500; }
+html.light .success-text { color: #27ae60; font-weight: 500; } /* A clear green */
+html.dark .success-text { color: #2ecc71; font-weight: 500; } /* Brighter green for dark */
 
-html.light .danger-text { color: #dc3545; font-weight: 500; }
-html.dark .danger-text { color: #ff6b6b; font-weight: 500; }
-
+html.light .danger-text { color: #c0392b; font-weight: 500; } /* A strong red */
+html.dark .danger-text { color: #e74c3c; font-weight: 500; } /* Clearer red for dark */
 
 /* --- Footer Styling --- */
 .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px; margin: 0; border-radius: 0; }
@@ -472,12 +480,4 @@ html.dark .footer { color: #adb5bd; }
 .color-swatch:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 .color-swatch.active { border-color: var(--el-color-primary); transform: translateY(-1px) scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-/* Neon Title */
-.neon-title {
-    font-family: 'ZCOOL KuaiLe', cursive; font-weight: normal; font-size: 2.2rem; position: relative;
-    background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
-    background-size: 400% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
-    animation: gradientFlow 5s linear infinite; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-}
-@keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 </style>
