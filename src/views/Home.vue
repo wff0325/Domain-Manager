@@ -31,6 +31,7 @@
                     <el-button type="primary" size="small" :icon="SwitchButton" @click="handleLogout">登出</el-button>
                 </el-tooltip>
 
+                <!-- 主题切换下拉菜单 -->
                 <el-dropdown trigger="click" @command="handleThemeChange">
                     <el-tooltip :content="`当前主题: ${themeLabels[theme]}`" placement="bottom">
                         <el-button type="primary" size="small" :icon="currentThemeIcon" />
@@ -464,7 +465,6 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* (Styles are unchanged, but included for completeness) */
 .neon-title {
     font-family: 'ZCOOL KuaiLe', cursive;
     font-weight: normal;
