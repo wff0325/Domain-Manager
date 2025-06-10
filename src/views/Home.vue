@@ -406,7 +406,6 @@ onMounted(() => {
     loadDomains();
     loadAlertConfig();
 });
-
 </script>
 
 <style>
@@ -422,7 +421,8 @@ onMounted(() => {
     background-clip: text;
     color: transparent;
     animation: gradientFlow 5s linear infinite;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    /* 清晰的描边 */
+    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes gradientFlow {
@@ -432,13 +432,8 @@ onMounted(() => {
 }
 
 #live2d-widget {
-    z-index: 5 !important; /* 确保它在背景之上，但在内容之下 */
+    z-index: 5 !important;
     pointer-events: none !important;
-}
-
-.dark {
-    --el-bg-color: transparent !important;
-    --el-bg-color-overlay: transparent !important;
 }
 </style>
 
@@ -448,12 +443,12 @@ onMounted(() => {
     min-height: 100vh;
     box-sizing: border-box;
     padding: 20px;
-    background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg');
+    background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg'); /* 固定一张好看的背景图 */
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
     position: relative;
-    overflow: hidden; /* 防止子元素溢出 */
+    overflow-x: hidden; /* 防止横向滚动条 */
 }
 
 /* 颜色遮罩层 */
@@ -461,34 +456,33 @@ onMounted(() => {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(255, 255, 255, 0.1); /* 日间模式的浅色遮罩 */
-    z-index: 1; /* 在背景图之上 */
+    background-color: rgba(255, 255, 255, 0); /* 亮色模式几乎不遮挡 */
+    z-index: 1;
     transition: background-color 0.5s ease;
 }
 .home-container.dark-mode::before {
-    background-color: rgba(0, 0, 0, 0.4); /* 夜间模式的深色遮罩 */
+    background-color: rgba(0, 0, 0, 0.5); /* 暗色模式加深遮罩 */
 }
 
-/* --- 透明磨砂玻璃面板 --- */
+/* --- 透明磨砂玻璃面板 (终极版) --- */
 .header, .custom-table, .footer {
     position: relative;
-    z-index: 10; /* 确保内容在遮罩和宠物之上 */
-    /* 核心回归：带回用户最爱的磨砂玻璃质感 */
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.25); /* 半透明白色背景 */
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 12px;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    transition: background-color 0.5s, border-color 0.5s;
-    /* 彻底解决可读性：面板内的文字颜色独立于全局 */
-    color: #333;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    margin: 0 auto 20px auto; /* 居中并添加底部间距 */
+    max-width: 1600px; /* 限制最大宽度，在大屏上更好看 */
+    color: #333; /* 默认深色文字 */
+    transition: background-color 0.5s, border-color 0.5s, color 0.5s;
 }
 .dark-mode .header, .dark-mode .custom-table, .dark-mode .footer {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(20, 20, 20, 0.3);
     border-color: rgba(255, 255, 255, 0.2);
-    color: #eaeaea;
+    color: #e0e0e0; /* 暗黑模式浅色文字 */
 }
 
 /* --- 元素样式 --- */
@@ -496,16 +490,18 @@ onMounted(() => {
     display: flex; flex-wrap: wrap; gap: 15px;
     align-items: center; justify-content: space-between; padding: 5px 20px;
 }
-/* RGB 标题在暗黑模式下需要更亮 */
-.dark-mode .neon-title { text-shadow: 1px 1px 5px rgba(255, 255, 255, 0.2); }
+.dark-mode .neon-title { /* 暗黑模式下让标题更亮 */
+    -webkit-text-stroke: 0px;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
 
 /* 表格样式 */
 .custom-table {
-    /* 覆盖 Element Plus 的边框颜色变量 */
-    --el-table-border-color: rgba(0,0,0,0.15);
+    padding: 10px;
+    --el-table-border-color: rgba(0,0,0,0.1);
 }
 .dark-mode .custom-table {
-    --el-table-border-color: rgba(255,255,255,0.15);
+    --el-table-border-color: rgba(255,255,255,0.2);
 }
 :deep(.el-table),
 :deep(.el-table__expanded-cell),
@@ -513,41 +509,53 @@ onMounted(() => {
 :deep(.el-table tr),
 :deep(.el-table td) {
     background-color: transparent !important;
-    color: inherit !important; /* 让文字颜色跟随父容器，实现主题切换 */
+    color: inherit !important;
+    /* 核心：为所有表格文字添加阴影，确保可读性 */
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}
+.dark-mode :deep(.el-table td) {
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
 }
 :deep(.el-table th) {
     font-weight: bold;
+    text-shadow: none; /* 表头不需要阴影 */
 }
 :deep(.el-table__row:hover td) {
-    background-color: rgba(0, 0, 0, 0.05) !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
 }
 .dark-mode :deep(.el-table__row:hover td) {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(0, 0, 0, 0.2) !important;
 }
 
-/* 链接和状态文本，颜色更鲜明 */
-.link { color: #0056b3; text-decoration: none; font-weight: bold; }
-.dark-mode .link { color: #8ab4f8; }
+/* 链接和状态文本，使用更强的对比色 */
+.link { color: #0056b3; font-weight: bold; }
+.dark-mode .link { color: #90caf9; }
 .link:hover { text-decoration: underline; }
 
 .warning-text { color: #b95000; font-weight: bold; }
-.dark-mode .warning-text { color: #fdd835; }
+.dark-mode .warning-text { color: #ffca28; }
 .success-text { color: #1e8e3e; font-weight: bold; }
-.dark-mode .success-text { color: #81c784; }
+.dark-mode .success-text { color: #a5d6a7; }
 .danger-text { color: #c93333; font-weight: bold; }
 .dark-mode .danger-text { color: #ef9a9a; }
 
 /* 页脚 */
 .footer {
-    position: fixed; bottom: 0; left: 0; right: 0;
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    right: 0;
+    max-width: none;
     margin: 0; padding: 10px;
     border-radius: 0;
+    border: none;
     box-shadow: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-}
-.dark-mode .footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    backdrop-filter: none;
+    text-shadow: 0 0 5px rgba(0,0,0,1);
+    color: #fff;
 }
 .footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; text-align: center; }
-.copyright, .separator, .social-link { color: inherit; }
+.separator { color: #fff; }
+.social-link { color: #fff; }
 </style>
