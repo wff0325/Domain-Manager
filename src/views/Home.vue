@@ -35,94 +35,103 @@
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
+                <!-- Theme selection dropdown -->
+                <el-dropdown trigger="click" @command="handleThemeChange">
+                    <el-button type="primary" size="small">
+                        主题
+                        <el-icon class="el-icon--right"><arrow-down /></el-icon>
+                    </el-button>
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item command="light">浅色模式</el-dropdown-item>
+                            <el-dropdown-item command="dark">深色模式</el-dropdown-item>
+                            <el-dropdown-item command="system">跟随系统</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
                 <el-tooltip content="登出系统" placement="bottom">
                     <el-button type="primary" size="small" :icon="SwitchButton" @click="handleLogout">登出</el-button>
                 </el-tooltip>
-                <el-switch v-model="isDarkMode" :active-icon="Moon" :inactive-icon="Sunny" @change="toggleDarkMode"
-                    inline-prompt class="theme-switch" />
             </div>
         </div>
-<el-table :data="domains" border style="width: 100%" class="custom-table">
-        <el-table-column label="域名" align="center" sortable>
-            <template #default="scope">
-                <a :href="'https://' + scope.row.domain" target="_blank" class="link">{{ scope.row.domain }}</a>
-            </template>
-        </el-table-column>
-        <el-table-column label="域名商" align="center" sortable prop="registrar">
-            <template #default="scope">
-                <a :href="scope.row.registrar_link" target="_blank" class="link">{{ scope.row.registrar }}</a>
-            </template>
-        </el-table-column>
-        <el-table-column prop="registrar_date" label="注册时间" align="center" sortable />
-        <el-table-column prop="expiry_date" label="过期时间" align="center" sortable />
-        <el-table-column label="剩余时间" align="center" sortable
-            :sort-method="(a, b) => calculateRemainingDays(a.expiry_date) - calculateRemainingDays(b.expiry_date)">
-            <template #default="scope">
-                <span :class="{ 'warning-text': calculateRemainingDays(scope.row.expiry_date) <= alertDays }">
-                    {{ calculateRemainingDays(scope.row.expiry_date) }}天
-                </span>
-            </template>
-        </el-table-column>
-        <el-table-column prop="service_type" label="服务类型" align="center" sortable />
-        <el-table-column prop="status" label="状态" align="center" sortable>
-            <template #default="scope">
-                <span :class="scope.row.status === '在线' ? 'success-text' : 'danger-text'">
-                    {{ scope.row.status }}
-                </span>
-            </template>
-        </el-table-column>
-        <el-table-column prop="memo" label="备注" align="center" sortable />
-        <el-table-column label="操作" width="200" align="center">
-            <template #default="scope">
-                <el-button type="primary" size="small" :icon="Edit" @click="handleEdit(scope.row)">修改</el-button>
-                <el-button type="danger" size="small" :icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-            </template>
-        </el-table-column>
-    </el-table>
+        <el-table :data="domains" border style="width: 100%" class="custom-table">
+            <el-table-column label="域名" align="center" sortable>
+                <template #default="scope">
+                    <a :href="'https://' + scope.row.domain" target="_blank" class="link">{{ scope.row.domain }}</a>
+                </template>
+            </el-table-column>
+            <el-table-column label="域名商" align="center" sortable prop="registrar">
+                <template #default="scope">
+                    <a :href="scope.row.registrar_link" target="_blank" class="link">{{ scope.row.registrar }}</a>
+                </template>
+            </el-table-column>
+            <el-table-column prop="registrar_date" label="注册时间" align="center" sortable class-name="yellow-text" />
+            <el-table-column prop="expiry_date" label="过期时间" align="center" sortable class-name="yellow-text" />
+            <el-table-column label="剩余时间" align="center" sortable class-name="yellow-text"
+                :sort-method="(a, b) => calculateRemainingDays(a.expiry_date) - calculateRemainingDays(b.expiry_date)">
+                <template #default="scope">
+                    <span :class="{ 'warning-text': calculateRemainingDays(scope.row.expiry_date) <= alertDays }">
+                        {{ calculateRemainingDays(scope.row.expiry_date) }}天
+                    </span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="service_type" label="服务类型" align="center" sortable class-name="yellow-text" />
+            <el-table-column prop="status" label="状态" align="center" sortable>
+                <template #default="scope">
+                    <span :class="scope.row.status === '在线' ? 'success-text' : 'danger-text'">
+                        {{ scope.row.status }}
+                    </span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="memo" label="备注" align="center" sortable class-name="yellow-text" />
+            <el-table-column label="操作" width="200" align="center">
+                <template #default="scope">
+                    <el-button type="primary" size="small" :icon="Edit" @click="handleEdit(scope.row)">修改</el-button>
+                    <el-button type="danger" size="small" :icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
 
-    <DomainDialog v-model:visible="dialogVisible" :is-edit="isEdit" :edit-data="editData"
-        @submit="handleDialogSubmit" />
+        <DomainDialog v-model:visible="dialogVisible" :is-edit="isEdit" :edit-data="editData"
+            @submit="handleDialogSubmit" />
 
-    <AlertConfigDialog v-model:visible="configVisible" :config="alertConfig" @submit="handleConfigSubmit" />
+        <AlertConfigDialog v-model:visible="configVisible" :config="alertConfig" @submit="handleConfigSubmit" />
 
-    <ImportDialog v-model:visible="importVisible" @success="loadDomains" />
+        <ImportDialog v-model:visible="importVisible" @success="loadDomains" />
 
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="copyright">
-                <span>© 2025 Domains-Support v1.0.5</span>
-                <span class="separator">|</span>
-                <span>作者：大疯子</span>
-                <span class="separator">|</span>
-                <div class="social-links">
-                    <a href="https://github.com/wff0325/Domain-Manager/tree/main" target="_blank"
-                        class="social-link" title="访问 GitHub 仓库">
-                        <el-icon class="social-icon"><svg viewBox="0 0 1024 1024" width="20" height="20">
-                                <path fill="currentColor"
-                                    d="M512 0C229.12 0 0 229.12 0 512c0 226.56 146.56 417.92 350.08 485.76 25.6 4.48 35.2-10.88 35.2-24.32 0-12.16-0.64-52.48-0.64-95.36-128.64 23.68-161.92-31.36-172.16-60.16-5.76-14.72-30.72-60.16-52.48-72.32-17.92-9.6-43.52-33.28-0.64-33.92 40.32-0.64 69.12 37.12 78.72 52.48 46.08 77.44 119.68 55.68 149.12 42.24 4.48-33.28 17.92-55.68 32.64-68.48-113.92-12.8-232.96-56.96-232.96-252.8 0-55.68 19.84-101.76 52.48-137.6-5.12-12.8-23.04-65.28 5.12-135.68 0 0 42.88-13.44 140.8 52.48 40.96-11.52 84.48-17.28 128-17.28 43.52 0 87.04 5.76 128 17.28 97.92-66.56 140.8-52.48 140.8-52.48 28.16 70.4 10.24 122.88 5.12 135.68 32.64 35.84 52.48 81.28 52.48 137.6 0 196.48-119.68 240-233.6 252.8 18.56 16 34.56 46.72 34.56 94.72 0 68.48-0.64 123.52-0.64 140.8 0 13.44 9.6 29.44 35.2 24.32C877.44 929.92 1024 737.92 1024 512 1024 229.12 794.88 0 512 0z" />
-                            </svg></el-icon>
-                    </a>
-                    <a href="https://www.youtube.com/" target="_blank" class="social-link"
-                        title="访问 YouTube 频道">
-                        <el-icon class="social-icon"><svg viewBox="0 0 1024 1024" width="20" height="20">
-                                <path fill="currentColor"
-                                    d="M941.3 296.1c-10.3-38.6-40.7-69-79.3-79.3C792.2 198 512 198 512 198s-280.2 0-350 18.7c-38.6 10.3-69 40.7-79.3 79.3C64 365.9 64 512 64 512s0 146.1 18.7 215.9c10.3 38.6 40.7 69 79.3 79.3C231.8 826 512 826 512 826s280.2 0 350-18.7c38.6-10.3 69-40.7 79.3-79.3C960 658.1 960 512 960 512s0-146.1-18.7-215.9zM423 646V378l232 134-232 134z" />
-                            </svg></el-icon>
-                    </a>
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="copyright">
+                    <span>© 2025 Domains-Support v1.0.5</span>
+                    <span class="separator">|</span>
+                    <span>作者：大疯子</span>
+                    <span class="separator">|</span>
+                    <div class="social-links">
+                        <a href="https://github.com/wff0325/Domain-Manager/tree/main" target="_blank"
+                            class="social-link" title="访问 GitHub 仓库">
+                            <el-icon class="social-icon"><svg viewBox="0 0 1024 1024" width="20" height="20">
+                                    <path fill="currentColor"
+                                        d="M512 0C229.12 0 0 229.12 0 512c0 226.56 146.56 417.92 350.08 485.76 25.6 4.48 35.2-10.88 35.2-24.32 0-12.16-0.64-52.48-0.64-95.36-128.64 23.68-161.92-31.36-172.16-60.16-5.76-14.72-30.72-60.16-52.48-72.32-17.92-9.6-43.52-33.28-0.64-33.92 40.32-0.64 69.12 37.12 78.72 52.48 46.08 77.44 119.68 55.68 149.12 42.24 4.48-33.28 17.92-55.68 32.64-68.48-113.92-12.8-232.96-56.96-232.96-252.8 0-55.68 19.84-101.76 52.48-137.6-5.12-12.8-23.04-65.28 5.12-135.68 0 0 42.88-13.44 140.8 52.48 40.96-11.52 84.48-17.28 128-17.28 43.52 0 87.04 5.76 128 17.28 97.92-66.56 140.8-52.48 140.8-52.48 28.16 70.4 10.24 122.88 5.12 135.68 32.64 35.84 52.48 81.28 52.48 137.6 0 196.48-119.68 240-233.6 252.8 18.56 16 34.56 46.72 34.56 94.72 0 68.48-0.64 123.52-0.64 140.8 0 13.44 9.6 29.44 35.2 24.32C877.44 929.92 1024 737.92 1024 512 1024 229.12 794.88 0 512 0z" />
+                                </svg></el-icon>
+                        </a>
+                        <a href="https://www.youtube.com/" target="_blank" class="social-link"
+                            title="访问 YouTube 频道">
+                            <el-icon class="social-icon"><svg viewBox="0 0 1024 1024" width="20" height="20">
+                                    <path fill="currentColor"
+                                        d="M941.3 296.1c-10.3-38.6-40.7-69-79.3-79.3C792.2 198 512 198 512 198s-280.2 0-350 18.7c-38.6 10.3-69 40.7-79.3 79.3C64 365.9 64 512 64 512s0 146.1 18.7 215.9c10.3 38.6 40.7 69 79.3 79.3C231.8 826 512 826 512 826s280.2 0 350-18.7c38.6-10.3 69-40.7 79.3-79.3C960 658.1 960 512 960 512s0-146.1-18.7-215.9zM423 646V378l232 134-232 134z" />
+                                </svg></el-icon>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </footer>
-</div>
-Use code with caution.
+        </footer>
+    </div>
 </template>
 <script setup lang="ts">
-// All your Javascript code from before remains unchanged.
-// Just copy and paste it here.
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Setting, Refresh, Plus, Edit, Delete, SwitchButton, Sunny, Moon, ArrowDown, Upload, Download } from '@element-plus/icons-vue'
+import { Setting, Refresh, Plus, Edit, Delete, SwitchButton, ArrowDown, Upload, Download } from '@element-plus/icons-vue'
 import { useAuth } from '../utils/auth'
 import DomainDialog from '../components/DomainDialog.vue'
 import AlertConfigDialog from '../components/AlertConfigDialog.vue'
@@ -156,7 +165,28 @@ const isEdit = ref(false)
 const editData = ref<Domain>()
 const importVisible = ref(false)
 
-const isDarkMode = ref(localStorage.getItem('darkMode') === 'true')
+// --- THEME LOGIC START ---
+const theme = ref(localStorage.getItem('theme') || 'system')
+const isDarkMode = ref(false)
+
+const handleThemeChange = (newTheme: string) => {
+    theme.value = newTheme
+    if (newTheme === 'system') {
+        localStorage.removeItem('theme')
+    } else {
+        localStorage.setItem('theme', newTheme)
+    }
+}
+
+watchEffect(() => {
+    if (theme.value === 'system') {
+        isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+    } else {
+        isDarkMode.value = theme.value === 'dark'
+    }
+    document.documentElement.classList.toggle('dark', isDarkMode.value)
+})
+// --- THEME LOGIC END ---
 
 const checkLoginStatus = () => {
     const token = auth.getAuthToken()
@@ -492,15 +522,15 @@ const handleExport = async () => {
     }
 }
 
-const toggleDarkMode = () => {
-    localStorage.setItem('darkMode', isDarkMode.value.toString())
-    document.documentElement.classList.toggle('dark', isDarkMode.value)
-}
-
 onMounted(() => {
-    if (isDarkMode.value) {
-        document.documentElement.classList.add('dark')
-    }
+    // Listener for OS theme changes (for 'system' mode)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        if (theme.value === 'system') {
+            isDarkMode.value = e.matches;
+            document.documentElement.classList.toggle('dark', isDarkMode.value);
+        }
+    });
+
     checkLoginStatus()
     loadDomains()
     loadAlertConfig()
@@ -597,6 +627,12 @@ onMounted(() => {
 }
 :deep(.el-table__row:hover td) {
     background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Custom yellow text for specific columns */
+:deep(.yellow-text .cell) {
+    color: #FFEB3B !important; /* Bright yellow */
+    font-weight: bold;
 }
 
 /* 链接和状态文本 */
