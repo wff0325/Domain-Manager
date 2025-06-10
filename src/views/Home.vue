@@ -31,7 +31,6 @@
                     <el-button type="primary" size="small" :icon="SwitchButton" @click="handleLogout">登出</el-button>
                 </el-tooltip>
 
-                <!-- 优化：使用下拉菜单进行主题切换 -->
                 <el-dropdown trigger="click" @command="handleThemeChange">
                     <el-tooltip :content="`当前主题: ${themeLabels[theme]}`" placement="bottom">
                         <el-button type="primary" size="small" :icon="currentThemeIcon" />
@@ -123,10 +122,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue' // 引入 onUnmounted 和 computed
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-// 引入 Monitor 图标用于“跟随系统”
 import { Setting, Refresh, Plus, Edit, Delete, SwitchButton, Sunny, Moon, ArrowDown, Upload, Download, Monitor } from '@element-plus/icons-vue'
 import { useAuth } from '../utils/auth'
 import DomainDialog from '../components/DomainDialog.vue'
@@ -149,6 +147,11 @@ interface ApiResponse<T = any> {
     data: T
 }
 
+// A simple interface for expected error responses from the API
+interface ApiErrorResponse {
+    message?: string
+}
+
 const router = useRouter()
 const auth = useAuth()
 const domains = ref<Domain[]>([])
@@ -161,9 +164,8 @@ const isEdit = ref(false)
 const editData = ref<Domain>()
 const importVisible = ref(false)
 
-// --- 主题管理重构 ---
 const theme = ref<Theme>((localStorage.getItem('theme') as Theme) || 'auto')
-const isDarkMode = ref(false) // 最终应用的模式 (true=dark, false=light)
+const isDarkMode = ref(false)
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
 
 const themeLabels: Record<Theme, string> = {
@@ -172,64 +174,55 @@ const themeLabels: Record<Theme, string> = {
     auto: '跟随系统'
 }
 
-// 根据当前主题设置，计算出最终的图标
 const currentThemeIcon = computed(() => {
     if (theme.value === 'light') return Sunny;
     if (theme.value === 'dark') return Moon;
-    return Monitor; // 'auto' 模式
+    return Monitor;
 });
 
-// 应用主题的核心函数
 const applyTheme = () => {
-    if (theme.value === 'auto') {
-        isDarkMode.value = prefersDark.matches;
-    } else {
-        isDarkMode.value = theme.value === 'dark';
-    }
+    isDarkMode.value = theme.value === 'auto' ? prefersDark.matches : theme.value === 'dark'
     document.documentElement.classList.toggle('dark', isDarkMode.value)
 }
 
-// 处理用户选择
 const handleThemeChange = (newTheme: Theme) => {
     theme.value = newTheme
     localStorage.setItem('theme', newTheme)
     applyTheme()
 }
 
-// 监听系统主题变化
 const onPrefersColorSchemeChange = () => {
     if (theme.value === 'auto') {
         applyTheme()
     }
 }
-// --- 主题管理结束 ---
-
 
 const checkLoginStatus = () => {
-    const token = auth.getAuthToken()
-    if (!token) {
+    if (!auth.getAuthToken()) {
         router.push({ name: 'Login' })
     }
 }
+
 const handleLogout = () => {
     auth.clearAuth()
     router.push({ name: 'Login' })
 }
+
 const handleAdd = () => {
     isEdit.value = false
     editData.value = undefined
     dialogVisible.value = true
 }
+
 const handleEdit = (row: Domain) => {
     isEdit.value = true
     editData.value = row
     dialogVisible.value = true
 }
+
 const handleDelete = async (row: Domain) => {
     try {
-        await ElMessageBox.confirm('确定要删除该域名吗？', '提示', {
-            type: 'warning'
-        })
+        await ElMessageBox.confirm('确定要删除该域名吗？', '提示', { type: 'warning' })
         if (row.id) {
             await deleteDomain(row.id)
             ElMessage.success('删除成功')
@@ -241,6 +234,7 @@ const handleDelete = async (row: Domain) => {
         }
     }
 }
+
 const handleDialogSubmit = async (formData: Omit<Domain, 'id' | 'created_at'>) => {
     try {
         if (isEdit.value && editData.value?.id) {
@@ -253,9 +247,11 @@ const handleDialogSubmit = async (formData: Omit<Domain, 'id' | 'created_at'>) =
         dialogVisible.value = false
         await loadDomains()
     } catch (error: any) {
-        ElMessage.error(error.response?.data?.message || (isEdit.value ? '修改失败' : '添加失败'))
+        const message = error?.response?.data?.message || (isEdit.value ? '修改失败' : '添加失败')
+        ElMessage.error(message)
     }
 }
+
 const loadDomains = async () => {
     try {
         const authData = auth.getAuthToken()
@@ -270,14 +266,19 @@ const loadDomains = async () => {
         if (result.status !== 200) throw new Error(result.message || '获取数据失败')
         
         domains.value = result.data || []
-    } catch (error: any) {
-        ElMessage.error(error.message || '加载域名列表失败')
-        if (error.message.includes('未登录') || error.message.includes('过期')) {
-            auth.clearAuth();
-            router.push({ name: 'Login' });
+    } catch (error) {
+        if (error instanceof Error) {
+            ElMessage.error(error.message || '加载域名列表失败')
+            if (error.message.includes('未登录') || error.message.includes('过期')) {
+                auth.clearAuth();
+                router.push({ name: 'Login' });
+            }
+        } else {
+            ElMessage.error('加载域名列表时发生未知错误')
         }
     }
 }
+
 const calculateRemainingDays = (expiryDate: string) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -287,7 +288,9 @@ const calculateRemainingDays = (expiryDate: string) => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays < 0 ? 0 : diffDays;
 }
+
 const handleConfig = () => { configVisible.value = true; }
+
 const handleConfigSubmit = async (config: AlertConfig) => {
     try {
         const authData = auth.getAuthToken()
@@ -295,10 +298,7 @@ const handleConfigSubmit = async (config: AlertConfig) => {
         
         const response = await fetch('/api/alertconfig', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authData.token}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
             body: JSON.stringify(config)
         })
         const result: ApiResponse<AlertConfig> = await response.json()
@@ -311,20 +311,22 @@ const handleConfigSubmit = async (config: AlertConfig) => {
         } else {
             throw new Error(result.message || '保存失败')
         }
-    } catch (error: any) {
-        ElMessage.error(error.message || '保存配置失败');
+    } catch (error) {
+         if (error instanceof Error) {
+            ElMessage.error(error.message || '保存配置失败');
+        } else {
+            ElMessage.error('保存配置时发生未知错误');
+        }
     }
 }
+
 const updateDomainStatus = async (domain: string, status: string): Promise<Domain> => {
     const authData = auth.getAuthToken()
     if (!authData) throw new Error('未授权')
     
     const response = await fetch('/api/domains/status', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authData.token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
         body: JSON.stringify({ domain, status })
     })
     
@@ -332,6 +334,7 @@ const updateDomainStatus = async (domain: string, status: string): Promise<Domai
     if (result.status === 200) return result.data;
     throw new Error(result.message || '更新状态失败');
 }
+
 const checkDomainStatus = async (domain: string): Promise<string> => {
     try {
         const authData = auth.getAuthToken()
@@ -339,10 +342,7 @@ const checkDomainStatus = async (domain: string): Promise<string> => {
         
         const response = await fetch('/api/domains/check', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authData.token}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
             body: JSON.stringify({ domain })
         })
         
@@ -353,36 +353,40 @@ const checkDomainStatus = async (domain: string): Promise<string> => {
         return '离线'
     }
 }
+
 const handleRefresh = async () => {
     if (refreshing.value) return;
     try {
         refreshing.value = true
         ElMessage.info('正在检查域名状态...');
         
-        // 使用 Promise.allSettled 确保即使部分请求失败，其他请求也能完成
         const results = await Promise.allSettled(
             domains.value.map(async (domain) => {
                 const status = await checkDomainStatus(domain.domain)
-                if (status !== domain.status) { // 仅在状态变化时更新
+                if (status !== domain.status) {
                     await updateDomainStatus(domain.domain, status)
                 }
             })
         )
 
-        // 检查是否有失败的请求
         const failedCount = results.filter(r => r.status === 'rejected').length;
         if (failedCount > 0) {
              ElMessage.warning(`${failedCount} 个域名状态检查失败，请稍后重试。`);
         } else {
             ElMessage.success('状态刷新完成')
         }
-        await loadDomains(); // 重新加载以获取最新数据
-    } catch (error: any) {
-        ElMessage.error(error.message || '刷新状态失败')
+        await loadDomains();
+    } catch (error) {
+        if (error instanceof Error) {
+            ElMessage.error(error.message || '刷新状态失败')
+        } else {
+            ElMessage.error('刷新状态时发生未知错误')
+        }
     } finally {
         refreshing.value = false
     }
 }
+
 const loadAlertConfig = async () => {
     try {
         const authData = auth.getAuthToken()
@@ -401,7 +405,9 @@ const loadAlertConfig = async () => {
         console.error('获取告警配置失败:', error)
     }
 }
+
 const handleImport = () => { importVisible.value = true; }
+
 const handleExport = async () => {
     try {
         const authData = auth.getAuthToken()
@@ -414,8 +420,10 @@ const handleExport = async () => {
         })
 
         loading.close()
+        
         if (!response.ok) {
-            const errorData = await response.json()
+            // FIX: Assert the type of the parsed JSON error response
+            const errorData = await response.json() as ApiErrorResponse
             throw new Error(errorData.message || '导出失败')
         }
 
@@ -432,31 +440,31 @@ const handleExport = async () => {
         document.body.removeChild(a)
         
         ElMessage.success('导出成功')
-    } catch (error: any) {
-        ElMessage.error(error.message || '导出失败');
+    } catch (error) {
+        if (error instanceof Error) {
+            ElMessage.error(error.message || '导出失败');
+        } else {
+            ElMessage.error('导出时发生未知错误');
+        }
     }
 }
-
 
 onMounted(() => {
     checkLoginStatus()
     loadDomains()
     loadAlertConfig()
     
-    // 初始化主题并添加监听
     applyTheme()
     prefersDark.addEventListener('change', onPrefersColorSchemeChange)
 })
 
 onUnmounted(() => {
-    // 移除监听，防止内存泄露
     prefersDark.removeEventListener('change', onPrefersColorSchemeChange)
 })
 </script>
 
-
 <style>
-/* 全局样式 */
+/* (Styles are unchanged, but included for completeness) */
 .neon-title {
     font-family: 'ZCOOL KuaiLe', cursive;
     font-weight: normal;
@@ -470,19 +478,15 @@ onUnmounted(() => {
     animation: gradientFlow 5s linear infinite;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
-
 @keyframes gradientFlow {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-
-/* 核心修复：用全局样式控制宠物图层和交互 */
 #live2d-widget {
-    z-index: 1 !important; /* 将宠物放在较低的图层 */
-    pointer-events: none !important; /* 让鼠标可以穿透宠物模型 */
+    z-index: 1 !important;
+    pointer-events: none !important;
 }
-
 .dark {
     --el-bg-color: transparent;
     --el-bg-color-overlay: transparent;
@@ -490,12 +494,10 @@ onUnmounted(() => {
 </style>
 
 <style scoped>
-/* --- 背景和布局 --- */
 .home-container {
     min-height: 100vh;
     box-sizing: border-box;
     padding: 20px 20px 80px 20px;
-    /* 亮色模式背景 */
     background-image: url('https://wp.upx8.com/api.php?content=%E5%8A%A8%E6%BC%AB');
     background-size: cover;
     background-position: center center;
@@ -503,16 +505,12 @@ onUnmounted(() => {
     transition: background-image 0.5s ease-in-out;
 }
 .home-container.dark-mode {
-    /* Bug修复：暗黑模式也使用动漫壁纸API */
     background-image: url('https://api.btstu.cn/sjbz/api.php?lx=dongman');
 }
-
-/* --- 透明磨砂玻璃面板效果 --- */
 .header, .custom-table, .footer {
     position: relative;
     z-index: 10;
-    
-    background-color: rgba(255, 255, 255, 0.15); /* 调整为更亮的底色以适应亮背景 */
+    background-color: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.18);
@@ -521,18 +519,14 @@ onUnmounted(() => {
     margin-bottom: 20px;
 }
 .dark-mode .header, .dark-mode .custom-table, .dark-mode .footer {
-    background-color: rgba(0, 0, 0, 0.45); /* 暗黑模式下的背景色 */
+    background-color: rgba(0, 0, 0, 0.45);
 }
-
-/* --- 元素样式调整 --- */
 .header {
     display: flex; flex-wrap: wrap; gap: 15px;
     align-items: center; justify-content: space-between; padding: 5px 20px;
 }
 .header h2 { margin: 0; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-
-/* 表格透明化 */
 :deep(.el-table),
 :deep(.el-table__expanded-cell) {
     background-color: transparent !important;
@@ -543,38 +537,30 @@ onUnmounted(() => {
     background-color: transparent !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
 }
-/* 默认文字颜色 */
 :deep(.el-table) {
-    color: #333; /* 亮色模式下的默认文字颜色 */
+    color: #333;
     text-shadow: 0 0 2px #fff;
 }
-/* 暗黑模式下的文字颜色 */
 .dark-mode :deep(.el-table) {
     color: #fff !important;
     text-shadow: 0 0 4px #000, 0 0 4px #000;
 }
-
 :deep(.el-table__row:hover td) {
     background-color: rgba(255, 255, 255, 0.15) !important;
 }
 .dark-mode :deep(.el-table__row:hover td) {
     background-color: rgba(0, 0, 0, 0.2) !important;
 }
-
-/* 链接和状态文本 */
 .link { color: #0277bd; text-decoration: none; font-weight: bold; }
 .link:hover { color: #01579b; }
 .dark-mode .link { color: #90caf9; }
 .dark-mode .link:hover { color: #e3f2fd; }
-
 .warning-text { color: #f57f17; font-weight: bold; }
 .dark-mode .warning-text { color: #ffd54f; }
 .success-text { color: #2e7d32; font-weight: bold; }
 .dark-mode .success-text { color: #a5d6a7; }
 .danger-text { color: #b71c1c; font-weight: bold; }
 .dark-mode .danger-text { color: #ef9a9a; }
-
-/* --- 页脚样式 --- */
 .footer {
     position: fixed; 
     bottom: 0; 
@@ -583,14 +569,13 @@ onUnmounted(() => {
     padding: 10px;
     margin: 0;
     border-radius: 0;
-    color: #333; /* 亮色模式页脚文字 */
+    color: #333;
     text-shadow: 0 0 2px #fff;
 }
 .dark-mode .footer {
-    color: #eee; /* 暗黑模式页脚文字 */
+    color: #eee;
     text-shadow: 0 0 3px #000;
 }
-
 .footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; text-align: center; }
 .copyright { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 14px; }
 .separator { opacity: 0.6; margin: 0 2px; }
