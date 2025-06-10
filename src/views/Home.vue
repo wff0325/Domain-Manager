@@ -112,7 +112,9 @@
         </el-drawer>
 
         <footer class="footer">
-            <!-- Footer content remains the same -->
+            <div class="footer-content">
+                <!-- Footer content remains the same -->
+            </div>
         </footer>
     </div>
 </template>
@@ -122,13 +124,23 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox, ElDrawer, ElRadioGroup, ElRadioButton, ElDivider } from 'element-plus';
 import { Setting, Refresh, Plus, Edit, Delete, SwitchButton, ArrowDown, Upload, Download } from '@element-plus/icons-vue';
-// ... other imports remain the same
 import { useAuth } from '../utils/auth';
 import DomainDialog from '../components/DomainDialog.vue';
 import AlertConfigDialog from '../components/AlertConfigDialog.vue';
 import ImportDialog from '../components/ImportDialog.vue';
 import { createDomain, updateDomain, deleteDomain, type DomainData } from '../api/domains';
 
+interface AlertConfig {
+    tg_token: string;
+    tg_userid: string;
+    days: number;
+}
+
+interface ApiResponse<T = any> {
+    status: number;
+    message: string;
+    data: T;
+}
 
 // --- App Settings Logic (Nezha-style) ---
 const settingsDrawerVisible = ref(false);
@@ -146,15 +158,12 @@ watch(panelStyle, (newStyle) => localStorage.setItem('panelStyle', newStyle));
 
 // Apply theme and accent color to the document
 const applySettings = () => {
-    // Apply theme
     if (theme.value === 'system') {
         isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
     } else {
         isDarkMode.value = theme.value === 'dark';
     }
     document.documentElement.classList.toggle('dark', isDarkMode.value);
-
-    // Apply accent color
     document.documentElement.style.setProperty('--el-color-primary', accentColor.value);
 };
 
@@ -162,15 +171,12 @@ const setAccentColor = (color: string) => {
     accentColor.value = color;
 };
 
-// Computed class for panel style
-const panelStyleClass = computed(() => {
-    return `panel-style-${panelStyle.value}`;
-});
+const panelStyleClass = computed(() => `panel-style-${panelStyle.value}`);
 
 onMounted(() => {
     applySettings();
-    // Listen for OS theme changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    // FIX: Removed unused 'e' parameter
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         if (theme.value === 'system') {
             applySettings();
         }
@@ -184,7 +190,7 @@ const router = useRouter();
 const auth = useAuth();
 const domains = ref<DomainData[]>([]);
 const alertDays = ref(30);
-const alertConfig = ref();
+const alertConfig = ref<AlertConfig>();
 const refreshing = ref(false);
 const dialogVisible = ref(false);
 const configVisible = ref(false);
@@ -192,124 +198,106 @@ const isEdit = ref(false);
 const editData = ref<DomainData>();
 const importVisible = ref(false);
 
-// ... All your other existing functions (handleLogout, loadDomains, etc.) remain unchanged.
-// Just copy and paste them here.
 const checkLoginStatus = () => {
-    const token = auth.getAuthToken()
-    if (!token) {
-        router.push({ name: 'Login' })
+    if (!auth.getAuthToken()) {
+        router.push({ name: 'Login' });
     }
-}
+};
 
 const handleLogout = () => {
-    auth.clearAuth()
-    router.push({ name: 'Login' })
-}
+    auth.clearAuth();
+    router.push({ name: 'Login' });
+};
 
 const handleAdd = () => {
-    isEdit.value = false
-    editData.value = undefined
-    dialogVisible.value = true
-}
+    isEdit.value = false;
+    editData.value = undefined;
+    dialogVisible.value = true;
+};
 
 const handleEdit = (row: DomainData) => {
-    isEdit.value = true
-    editData.value = row
-    dialogVisible.value = true
-}
+    isEdit.value = true;
+    editData.value = row;
+    dialogVisible.value = true;
+};
 
 const handleDelete = async (row: DomainData) => {
     try {
-        await ElMessageBox.confirm('确定要删除该域名吗？', '提示', {
-            type: 'warning'
-        })
-
+        await ElMessageBox.confirm('确定要删除该域名吗？', '提示', { type: 'warning' });
         if (row.id) {
-            await deleteDomain(row.id)
-            ElMessage.success('删除成功')
-            await loadDomains()
+            await deleteDomain(row.id);
+            ElMessage.success('删除成功');
+            await loadDomains();
         }
     } catch (error) {
         if (error !== 'cancel') {
-            ElMessage.error('删除失败')
+            ElMessage.error('删除失败');
         }
     }
-}
+};
 
 const handleDialogSubmit = async (formData: Omit<DomainData, 'id' | 'created_at'>) => {
     try {
         if (isEdit.value && editData.value?.id) {
-            await updateDomain(editData.value.id, formData)
-            ElMessage.success('修改成功')
+            await updateDomain(editData.value.id, formData);
+            ElMessage.success('修改成功');
         } else {
-            await createDomain(formData)
-            ElMessage.success('添加成功')
+            await createDomain(formData);
+            ElMessage.success('添加成功');
         }
-        dialogVisible.value = false
-        await loadDomains()
+        dialogVisible.value = false;
+        await loadDomains();
     } catch (error: any) {
-        ElMessage.error(error.response?.data?.message || (isEdit.value ? '修改失败' : '添加失败'))
+        ElMessage.error(error.response?.data?.message || (isEdit.value ? '修改失败' : '添加失败'));
     }
-}
+};
 
 const loadDomains = async () => {
     try {
-        const authData = auth.getAuthToken()
-        if (!authData) {
-            throw new Error('未登录或登录已过期')
-        }
-
+        const authData = auth.getAuthToken();
+        if (!authData) throw new Error('未登录或登录已过期');
+        
         const response = await fetch('/api/domains', {
-            headers: {
-                'Authorization': `Bearer ${authData.token}`,
-                'Content-Type': 'application/json'
-            }
-        })
+            headers: { 'Authorization': `Bearer ${authData.token}` }
+        });
 
         if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.message || '请求失败')
+            // FIX: Added type assertion for error object
+            const errorData = await response.json() as { message: string };
+            throw new Error(errorData.message || '请求失败');
         }
 
-        const result = await response.json()
-
+        // FIX: Added type assertion for success response
+        const result = await response.json() as ApiResponse<DomainData[]>;
         if (result.status !== 200) {
-            throw new Error(result.message || '请求失败')
+            throw new Error(result.message || '请求失败');
         }
-
-        domains.value = result.data || []
+        domains.value = result.data || [];
     } catch (error: any) {
-        ElMessage.error(error.message || '加载域名列表失败')
-        if (error.message === '未授权访问' || error.message === '无效的访问令牌') {
-            auth.clearAuth()
-            router.push({ name: 'Login' })
+        ElMessage.error(error.message || '加载域名列表失败');
+        if (error.message.includes('授权') || error.message.includes('令牌')) {
+            auth.clearAuth();
+            router.push({ name: 'Login' });
         }
     }
-}
+};
 
 const calculateRemainingDays = (expiryDate: string) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const expiry = new Date(expiryDate)
-    expiry.setHours(0, 0, 0, 0)
-    const diffTime = expiry.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    if (diffDays < 0) {
-        return 0
-    }
-    return diffDays
-}
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expiry = new Date(expiryDate);
+    const diffTime = expiry.getTime() - today.getTime();
+    return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+};
 
 const handleConfig = () => {
-    configVisible.value = true
-}
+    configVisible.value = true;
+};
 
-const handleConfigSubmit = async (config: any) => {
+const handleConfigSubmit = async (config: AlertConfig) => {
     try {
-        const authData = auth.getAuthToken()
-        if (!authData) {
-            throw new Error('未登录或登录已过期')
-        }
+        const authData = auth.getAuthToken();
+        if (!authData) throw new Error('未登录或登录已过期');
 
         const response = await fetch('/api/alertconfig', {
             method: 'POST',
@@ -318,145 +306,139 @@ const handleConfigSubmit = async (config: any) => {
                 'Authorization': `Bearer ${authData.token}`
             },
             body: JSON.stringify(config)
-        })
+        });
 
-        const result = await response.json()
-
+        // FIX: Added type assertion
+        const result = await response.json() as ApiResponse;
         if (result.status === 200) {
-            ElMessage.success('配置保存成功')
-            alertDays.value = config.days
-            alertConfig.value = config
+            ElMessage.success('配置保存成功');
+            alertDays.value = config.days;
+            alertConfig.value = config;
         } else {
-            throw new Error(result.message || '保存失败')
+            throw new Error(result.message || '保存失败');
         }
     } catch (error: unknown) {
-        if (error instanceof Error) {
-            ElMessage.error(error.message)
-            if (error.message === '未授权访问' || error.message === '无效的访问令牌') {
-                auth.clearAuth()
-                router.push({ name: 'Login' })
-            }
-        } else {
-            ElMessage.error('保存配置失败')
+        const errorMessage = error instanceof Error ? error.message : '保存配置失败';
+        ElMessage.error(errorMessage);
+        if (errorMessage.includes('授权') || errorMessage.includes('令牌')) {
+            auth.clearAuth();
+            router.push({ name: 'Login' });
         }
     }
-}
+};
 
 const updateDomainStatus = async (domain: string, status: string): Promise<DomainData> => {
-    const authData = auth.getAuthToken()
-    if (!authData) throw new Error('未登录或登录已过期')
+    const authData = auth.getAuthToken();
+    if (!authData) throw new Error('未登录或登录已过期');
 
     const response = await fetch('/api/domains/status', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authData.token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
         body: JSON.stringify({ domain, status })
-    })
+    });
 
-    const result = await response.json()
-    if (result.status === 200) {
-        return result.data
+    // FIX: Added type assertion
+    const result = await response.json() as ApiResponse<DomainData>;
+    if (result.status === 200 && result.data) {
+        return result.data;
     }
-    throw new Error(result.message || '更新失败')
-}
+    throw new Error(result.message || '更新失败');
+};
 
 const checkDomainStatus = async (domain: string): Promise<string> => {
     try {
-        const authData = auth.getAuthToken()
-        if (!authData) throw new Error('未登录或登录已过期')
+        const authData = auth.getAuthToken();
+        if (!authData) throw new Error('未登录或登录已过期');
 
         const response = await fetch('/api/domains/check', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authData.token}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
             body: JSON.stringify({ domain })
-        })
-
-        const result = await response.json()
-        return result.status === 200 ? result.data.status : '离线'
+        });
+        
+        // FIX: Added type assertion
+        const result = await response.json() as ApiResponse<{ status: string }>;
+        return result.status === 200 && result.data ? result.data.status : '离线';
     } catch (error) {
-        console.error(`检查域名 ${domain} 状态失败:`, error)
-        return '离线'
+        console.error(`检查域名 ${domain} 状态失败:`, error);
+        return '离线';
     }
-}
+};
 
 const handleRefresh = async () => {
-    if (refreshing.value) return
-    refreshing.value = true
+    if (refreshing.value) return;
+    refreshing.value = true;
     try {
-        ElMessage.info('正在检查域名状态...')
+        ElMessage.info('正在检查域名状态...');
         const updatedDomains = await Promise.all(
             domains.value.map(async (domain) => {
-                const status = await checkDomainStatus(domain.domain)
-                return await updateDomainStatus(domain.domain, status)
+                const status = await checkDomainStatus(domain.domain);
+                return await updateDomainStatus(domain.domain, status);
             })
-        )
-        domains.value = updatedDomains
-        ElMessage.success('状态刷新完成')
+        );
+        domains.value = updatedDomains;
+        ElMessage.success('状态刷新完成');
     } catch (error: unknown) {
-        ElMessage.error(error instanceof Error ? error.message : '刷新状态失败')
+        ElMessage.error(error instanceof Error ? error.message : '刷新状态失败');
     } finally {
-        refreshing.value = false
+        refreshing.value = false;
     }
-}
+};
 
 const loadAlertConfig = async () => {
     try {
-        const authData = auth.getAuthToken()
-        if (!authData) return
+        const authData = auth.getAuthToken();
+        if (!authData) return;
 
         const response = await fetch('/api/alertconfig', {
             headers: { 'Authorization': `Bearer ${authData.token}` }
-        })
-        const result = await response.json()
+        });
+        
+        // FIX: Added type assertion
+        const result = await response.json() as ApiResponse<AlertConfig>;
         if (result.status === 200 && result.data) {
-            alertConfig.value = result.data
-            alertDays.value = result.data.days
+            alertConfig.value = result.data;
+            alertDays.value = result.data.days;
         }
     } catch (error) {
-        console.error('获取告警配置失败:', error)
+        console.error('获取告警配置失败:', error);
     }
-}
+};
 
 const handleImport = () => {
-    importVisible.value = true
-}
+    importVisible.value = true;
+};
 
 const handleExport = async () => {
-    const loading = ElMessage.info({ message: '正在准备导出数据...', duration: 0 })
+    const loading = ElMessage.info({ message: '正在准备导出数据...', duration: 0 });
     try {
-        const authData = auth.getAuthToken()
-        if (!authData) throw new Error('未登录或登录已过期')
+        const authData = auth.getAuthToken();
+        if (!authData) throw new Error('未登录或登录已过期');
 
         const response = await fetch('/api/domains/export', {
             headers: { 'Authorization': `Bearer ${authData.token}` }
-        })
+        });
 
         if (!response.ok) {
             const errorData = await response.json() as { message: string };
-            throw new Error(errorData.message || '导出失败')
+            throw new Error(errorData.message || '导出失败');
         }
 
-        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `domains-export.json`
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = filename
-        a.click()
-        window.URL.revokeObjectURL(url)
-        ElMessage.success('导出成功')
+        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `domains-export.json`;
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        ElMessage.success('导出成功');
     } catch (error) {
-        ElMessage.error(error instanceof Error ? error.message : '导出失败')
+        ElMessage.error(error instanceof Error ? error.message : '导出失败');
     } finally {
-        loading.close()
+        loading.close();
     }
-}
-
+};
 
 onMounted(() => {
     checkLoginStatus();
@@ -467,11 +449,11 @@ onMounted(() => {
 </script>
 
 <style>
-/* ... Your existing global styles for neon-title, live2d-widget, etc. remain the same ... */
+/* ... Global styles remain the same ... */
 </style>
 
 <style scoped>
-/* --- Background and Layout --- */
+/* ... Scoped styles remain the same ... */
 .home-container {
     min-height: 100vh;
     box-sizing: border-box;
@@ -482,7 +464,6 @@ onMounted(() => {
     transition: background-image 0.5s ease-in-out, background-color 0.3s;
 }
 
-/* Light/Dark background images */
 .home-container:not(.dark-mode) {
     background-image: url('https://wp.upx8.com/api.php?content=%E5%8A%A8%E6%BC%AB');
 }
@@ -490,7 +471,6 @@ onMounted(() => {
     background-image: url('https://images.unsplash.com/photo-1532372576444-39321318F8a7?w=1200');
 }
 
-/* --- Panel Styles (Misty vs Solid) --- */
 .header, .custom-table, .footer {
     position: relative;
     z-index: 10;
@@ -501,7 +481,6 @@ onMounted(() => {
     border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-/* Misty Style (Default) */
 .panel-style-misty .header, 
 .panel-style-misty .custom-table, 
 .panel-style-misty .footer {
@@ -515,7 +494,6 @@ onMounted(() => {
     background-color: rgba(0, 0, 0, 0.6);
 }
 
-/* Solid Style */
 .panel-style-solid .header,
 .panel-style-solid .custom-table,
 .panel-style-solid .footer {
@@ -528,8 +506,6 @@ onMounted(() => {
     background-color: rgba(40, 40, 40, 0.9);
 }
 
-
-/* --- Other element styles --- */
 .header {
     display: flex; flex-wrap: wrap; gap: 15px;
     align-items: center; justify-content: space-between; padding: 5px 20px;
@@ -537,7 +513,6 @@ onMounted(() => {
 .header h2 { margin: 0; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
-/* Table transparency and text colors */
 :deep(.el-table),
 :deep(.el-table__expanded-cell) {
     background-color: transparent !important;
@@ -582,7 +557,6 @@ onMounted(() => {
 .success-text { color: #a5d6a7; font-weight: bold; }
 .danger-text { color: #ef9a9a; font-weight: bold; }
 
-/* Footer */
 .footer {
     position: fixed; bottom: 0; left: 0; right: 0;
     padding: 10px; margin: 0; border-radius: 0;
@@ -595,9 +569,7 @@ onMounted(() => {
 .dark-mode.panel-style-solid .footer {
     color: #E5EAF3;
 }
-/* ... other footer styles remain the same ... */
 
-/* --- Settings Drawer --- */
 .settings-container {
     padding: 0 10px;
 }
@@ -627,5 +599,4 @@ onMounted(() => {
     border-color: var(--el-color-primary);
     transform: scale(1.2);
 }
-
 </style>
