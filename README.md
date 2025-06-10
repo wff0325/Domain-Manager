@@ -1,8 +1,8 @@
-![Domain-Support](https://look.pics.cloudns.ch/img/cover2.png)
+![Domain-Manager](https://look.pics.cloudns.ch/img/cover2.png)
 
 <div align="center">
 
-# Domains-Support
+# Domains-Manager
 
 </div>
 
@@ -181,14 +181,5 @@
 
 本项目基于 MIT 许可证开源 - 查看 [LICENSE](LICENSE) 文件了解更多详情。
 
-## 赞助
-
-| 赞助人                                                                                                                 | 赞助方式                 | 备注 |
-| ---------------------------------------------------------------------------------------------------------------------- | ------------------------ | ---- |
-| [VTEXS](https://www.vtexs.com) | 免费提供服务器 | - |
-
-## 作者
-
-饭奇骏 ([@frankiejun](https://github.com/frankiejun))
 
 
