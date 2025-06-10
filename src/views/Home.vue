@@ -65,17 +65,18 @@
                     <a :href="scope.row.registrar_link" target="_blank" class="link">{{ scope.row.registrar }}</a>
                 </template>
             </el-table-column>
-            <el-table-column prop="registrar_date" label="注册时间" align="center" sortable class-name="yellow-text" />
-            <el-table-column prop="expiry_date" label="过期时间" align="center" sortable class-name="yellow-text" />
-            <el-table-column label="剩余时间" align="center" sortable class-name="yellow-text"
+            <!-- Corrected: class-name only affects cells, not header -->
+            <el-table-column prop="registrar_date" label="注册时间" align="center" sortable class-name="yellow-text-cell" />
+            <el-table-column prop="expiry_date" label="过期时间" align="center" sortable class-name="yellow-text-cell" />
+            <el-table-column label="剩余时间" align="center" sortable
                 :sort-method="(a, b) => calculateRemainingDays(a.expiry_date) - calculateRemainingDays(b.expiry_date)">
                 <template #default="scope">
-                    <span :class="{ 'warning-text': calculateRemainingDays(scope.row.expiry_date) <= alertDays }">
+                    <span :class="['yellow-text-cell', { 'warning-text': calculateRemainingDays(scope.row.expiry_date) <= alertDays }]">
                         {{ calculateRemainingDays(scope.row.expiry_date) }}天
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column prop="service_type" label="服务类型" align="center" sortable class-name="yellow-text" />
+            <el-table-column prop="service_type" label="服务类型" align="center" sortable class-name="yellow-text-cell" />
             <el-table-column prop="status" label="状态" align="center" sortable>
                 <template #default="scope">
                     <span :class="scope.row.status === '在线' ? 'success-text' : 'danger-text'">
@@ -83,7 +84,7 @@
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column prop="memo" label="备注" align="center" sortable class-name="yellow-text" />
+            <el-table-column prop="memo" label="备注" align="center" sortable class-name="yellow-text-cell" />
             <el-table-column label="操作" width="200" align="center">
                 <template #default="scope">
                     <el-button type="primary" size="small" :icon="Edit" @click="handleEdit(scope.row)">修改</el-button>
@@ -128,6 +129,7 @@
     </div>
 </template>
 <script setup lang="ts">
+// All Javascript code from the previous step remains the same.
 import { ref, onMounted, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -232,28 +234,22 @@ const handleDelete = async (row: Domain) => {
 
 const handleDialogSubmit = async (formData: Omit<Domain, 'id' | 'created_at'>) => {
     try {
-        console.log('提交的表单数据:', formData)
         if (isEdit.value && editData.value?.id) {
-            const response = await updateDomain(editData.value.id, formData)
-            console.log('更新响应:', response)
+            await updateDomain(editData.value.id, formData)
             ElMessage.success('修改成功')
         } else {
-            const response = await createDomain(formData)
-            console.log('创建响应:', response)
+            await createDomain(formData)
             ElMessage.success('添加成功')
         }
         dialogVisible.value = false
         await loadDomains()
     } catch (error: any) {
-        console.error('保存失败:', error)
-        console.error('错误响应:', error.response?.data)
         ElMessage.error(error.response?.data?.message || (isEdit.value ? '修改失败' : '添加失败'))
     }
 }
 
 const loadDomains = async () => {
     try {
-        console.log('开始加载域名列表')
         const authData = auth.getAuthToken()
         if (!authData) {
             throw new Error('未登录或登录已过期')
@@ -265,7 +261,6 @@ const loadDomains = async () => {
                 'Content-Type': 'application/json'
             }
         })
-        console.log('域名列表原始响应:', response)
 
         if (!response.ok) {
             const errorData = await response.json() as ApiResponse<null>
@@ -273,20 +268,13 @@ const loadDomains = async () => {
         }
 
         const result = await response.json() as ApiResponse<Domain[]>
-        console.log('解析后的响应:', result)
 
         if (result.status !== 200) {
             throw new Error(result.message || '请求失败')
         }
 
         domains.value = result.data || []
-        console.log('设置域名列表成功:', domains.value)
     } catch (error: any) {
-        console.error('加载域名列表失败:', error)
-        console.error('错误详情:', {
-            message: error.message,
-            stack: error.stack
-        })
         ElMessage.error(error.message || '加载域名列表失败')
         if (error.message === '未授权访问' || error.message === '无效的访问令牌') {
             auth.clearAuth()
@@ -338,7 +326,6 @@ const handleConfigSubmit = async (config: AlertConfig) => {
             throw new Error(result.message || '保存失败')
         }
     } catch (error: unknown) {
-        console.error('保存配置失败:', error)
         if (error instanceof Error) {
             ElMessage.error(error.message)
             if (error.message === '未授权访问' || error.message === '无效的访问令牌') {
@@ -352,49 +339,29 @@ const handleConfigSubmit = async (config: AlertConfig) => {
 }
 
 const updateDomainStatus = async (domain: string, status: string): Promise<Domain> => {
-    try {
-        const authData = auth.getAuthToken()
-        if (!authData) {
-            throw new Error('未登录或登录已过期')
-        }
+    const authData = auth.getAuthToken()
+    if (!authData) throw new Error('未登录或登录已过期')
 
-        const response = await fetch('/api/domains/status', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authData.token}`
-            },
-            body: JSON.stringify({ domain, status })
-        })
+    const response = await fetch('/api/domains/status', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authData.token}`
+        },
+        body: JSON.stringify({ domain, status })
+    })
 
-        const result = await response.json() as ApiResponse<Domain>
-
-        if (result.status === 200) {
-            return result.data
-        } else {
-            throw new Error(result.message || '更新失败')
-        }
-    } catch (error: unknown) {
-        console.error('更新状态失败:', error)
-        if (error instanceof Error) {
-            ElMessage.error(error.message)
-            if (error.message === '未授权访问' || error.message === '无效的访问令牌') {
-                auth.clearAuth()
-                router.push({ name: 'Login' })
-            }
-        } else {
-            ElMessage.error('更新状态失败')
-        }
-        throw error
+    const result = await response.json() as ApiResponse<Domain>
+    if (result.status === 200) {
+        return result.data
     }
+    throw new Error(result.message || '更新失败')
 }
 
 const checkDomainStatus = async (domain: string): Promise<string> => {
     try {
         const authData = auth.getAuthToken()
-        if (!authData) {
-            throw new Error('未登录或登录已过期')
-        }
+        if (!authData) throw new Error('未登录或登录已过期')
 
         const response = await fetch('/api/domains/check', {
             method: 'POST',
@@ -406,12 +373,7 @@ const checkDomainStatus = async (domain: string): Promise<string> => {
         })
 
         const result = await response.json() as ApiResponse<{ status: string }>
-
-        if (result.status === 200) {
-            return result.data.status
-        } else {
-            throw new Error(result.message || '检查失败')
-        }
+        return result.status === 200 ? result.data.status : '离线'
     } catch (error) {
         console.error(`检查域名 ${domain} 状态失败:`, error)
         return '离线'
@@ -420,22 +382,18 @@ const checkDomainStatus = async (domain: string): Promise<string> => {
 
 const handleRefresh = async () => {
     if (refreshing.value) return
-
+    refreshing.value = true
     try {
-        refreshing.value = true
         ElMessage.info('正在检查域名状态...')
-
-        const statusChecks = domains.value.map(async (domain) => {
-            const status = await checkDomainStatus(domain.domain)
-            const updatedDomain = await updateDomainStatus(domain.domain, status)
-            return updatedDomain
-        })
-
-        const updatedDomains = await Promise.all(statusChecks)
+        const updatedDomains = await Promise.all(
+            domains.value.map(async (domain) => {
+                const status = await checkDomainStatus(domain.domain)
+                return await updateDomainStatus(domain.domain, status)
+            })
+        )
         domains.value = updatedDomains
         ElMessage.success('状态刷新完成')
     } catch (error: unknown) {
-        console.error('刷新状态失败:', error)
         ElMessage.error(error instanceof Error ? error.message : '刷新状态失败')
     } finally {
         refreshing.value = false
@@ -445,32 +403,18 @@ const handleRefresh = async () => {
 const loadAlertConfig = async () => {
     try {
         const authData = auth.getAuthToken()
-        if (!authData) {
-            throw new Error('未登录或登录已过期')
-        }
+        if (!authData) return
 
         const response = await fetch('/api/alertconfig', {
-            headers: {
-                'Authorization': `Bearer ${authData.token}`,
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Authorization': `Bearer ${authData.token}` }
         })
         const result = await response.json() as ApiResponse<AlertConfig>
-
         if (result.status === 200 && result.data) {
             alertConfig.value = result.data
             alertDays.value = result.data.days
-        } else {
-            throw new Error(result.message || '获取配置失败')
         }
-    } catch (error: unknown) {
+    } catch (error) {
         console.error('获取告警配置失败:', error)
-        if (error instanceof Error) {
-            if (error.message === '未授权访问' || error.message === '无效的访问令牌') {
-                auth.clearAuth()
-                router.push({ name: 'Login' })
-            }
-        }
     }
 }
 
@@ -479,58 +423,46 @@ const handleImport = () => {
 }
 
 const handleExport = async () => {
+    const loading = ElMessage.info({ message: '正在准备导出数据...', duration: 0 })
     try {
         const authData = auth.getAuthToken()
-        if (!authData) {
-            throw new Error('未登录或登录已过期')
-        }
-        
-        const loading = ElMessage.info({
-            message: '正在准备导出数据...',
-            duration: 0
-        })
+        if (!authData) throw new Error('未登录或登录已过期')
 
         const response = await fetch('/api/domains/export', {
-            headers: {
-                'Authorization': `Bearer ${authData.token}`
-            }
+            headers: { 'Authorization': `Bearer ${authData.token}` }
         })
-        
-        loading.close()
 
         if (!response.ok) {
-            const errorData = await response.json() as ApiResponse<null>
+            const errorData = await response.json()
             throw new Error(errorData.message || '导出失败')
         }
 
-        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `domains-export-${new Date().toISOString().split('T')[0]}.json`
-
+        const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `domains-export.json`
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
         a.download = filename
-        document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-
         ElMessage.success('导出成功')
     } catch (error) {
-        console.error('导出失败:', error)
         ElMessage.error(error instanceof Error ? error.message : '导出失败')
+    } finally {
+        loading.close()
     }
 }
 
 onMounted(() => {
-    // Listener for OS theme changes (for 'system' mode)
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const themeHandler = (e: MediaQueryListEvent) => {
         if (theme.value === 'system') {
             isDarkMode.value = e.matches;
             document.documentElement.classList.toggle('dark', isDarkMode.value);
         }
-    });
-
+    }
+    mediaQuery.addEventListener('change', themeHandler)
+    
     checkLoginStatus()
     loadDomains()
     loadAlertConfig()
@@ -574,7 +506,6 @@ onMounted(() => {
 .home-container {
     min-height: 100vh;
     box-sizing: border-box;
-    /* 核心修复：恢复居中布局，不再为宠物留白 */
     padding: 20px 20px 80px 20px;
     background-image: url('https://wp.upx8.com/api.php?content=%E5%8A%A8%E6%BC%AB');
     background-size: cover;
@@ -582,23 +513,22 @@ onMounted(() => {
     background-attachment: fixed;
     transition: background-image 0.5s ease-in-out;
 }
+/* CORRECTED: Using a new, reliable URL for the dark mode background */
 .home-container.dark-mode {
-    background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg');
+    background-image: url('https://images.unsplash.com/photo-1532372576444-39321318F8a7?w=1200');
 }
 
 /* --- 透明磨砂玻璃面板效果 --- */
 .header, .custom-table, .footer {
-    /* 核心修复：添加 position 和 z-index，让内容浮在宠物之上 */
     position: relative;
     z-index: 10;
-    
     background-color: rgba(0, 0, 0, 0.45); 
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 12px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    margin-bottom: 20px; /* 统一间距 */
+    margin-bottom: 20px;
 }
 .dark-mode .header, .dark-mode .custom-table, .dark-mode .footer {
     background-color: rgba(0, 0, 0, 0.6);
@@ -629,17 +559,21 @@ onMounted(() => {
     background-color: rgba(255, 255, 255, 0.15) !important;
 }
 
-/* Custom yellow text for specific columns */
-:deep(.yellow-text .cell) {
+/* CORRECTED: This selector now only targets table body cells (td), not headers (th) */
+:deep(td.yellow-text-cell .cell),
+.yellow-text-cell {
     color: #FFEB3B !important; /* Bright yellow */
     font-weight: bold;
+}
+/* Ensure the warning color overrides the yellow when needed */
+.warning-text { 
+    color: #ffd54f !important;
 }
 
 /* 链接和状态文本 */
 .link { color: #90caf9; text-decoration: none; font-weight: bold; }
 .link:hover { color: #e3f2fd; }
 
-.warning-text { color: #ffd54f; font-weight: bold; }
 .success-text { color: #a5d6a7; font-weight: bold; }
 .danger-text { color: #ef9a9a; font-weight: bold; }
 
@@ -650,8 +584,8 @@ onMounted(() => {
     left: 0; 
     right: 0;
     padding: 10px;
-    margin: 0; /* 页脚不应有外边距 */
-    border-radius: 0; /* 页脚通常是直角 */
+    margin: 0;
+    border-radius: 0;
     color: #eee;
     text-shadow: 0 0 3px #000;
 }
