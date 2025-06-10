@@ -109,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-// JavaScript部分与上一版本相同，无需更改
+// JavaScript 部分与上一个版本相同，无需更改
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox, ElDrawer, ElRadioGroup, ElRadioButton, ElDivider } from 'element-plus';
@@ -327,7 +327,7 @@ onMounted(() => {
 });
 </script>
 
-<style> /* 全局样式 */
+<style> /* 全局样式 - 非 SCSS，直接 CSS */
 #live2d-widget {
     z-index: 1 !important; 
     pointer-events: none !important; 
@@ -340,25 +340,83 @@ onMounted(() => {
 }
 @keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-/* === 修正：确保输入框和日期选择器内的文字颜色随主题变化 (全局影响 Element Plus) === */
-html.light .el-input__inner,
-html.light .el-textarea__inner {
-    color: #303133 !important; 
+/* === 全局 Element Plus 主题覆盖 (修正对话框和表单元素) === */
+html.light .el-dialog, html.light .el-drawer {
+    --el-dialog-bg-color: #ffffff !important;
 }
-html.dark .el-input__inner,
-html.dark .el-textarea__inner {
-    color: #E5EAF3 !important; 
+html.dark .el-dialog, html.dark .el-drawer {
+    --el-dialog-bg-color: #161d26 !important; /* 调整为更匹配深色主题的背景 */
 }
 
-/* 对话框标题和内容文字颜色，确保它们也随主题变化 */
-html.light .el-dialog__title { color: #303133 !important; }
-html.dark .el-dialog__title { color: #E5EAF3 !important; }
+html.light .el-dialog__header, html.light .el-drawer__header { color: #303133 !important; }
+html.dark .el-dialog__header, html.dark .el-drawer__header { color: #e5e7eb !important; }
 
-html.light .el-dialog__body { color: #474747 !important; } /* 比输入框文字稍浅一点 */
-html.dark .el-dialog__body { color: #c3c4c7 !important; } /* 比输入框文字稍暗一点 */
+html.light .el-dialog__body, html.light .el-drawer__body { color: #474747 !important; }
+html.dark .el-dialog__body, html.dark .el-drawer__body { color: #d1d5db !important; }
 
-/* 如果需要，还可以调整日期选择器面板的颜色，但通常EP会自动处理 */
-/* 例如: html.dark .el-date-picker { background-color: #141414; } */
+html.light .el-dialog .el-form-item__label, html.light .el-drawer .el-form-item__label { color: #4b5563 !important; }
+html.dark .el-dialog .el-form-item__label, html.dark .el-drawer .el-form-item__label { color: #9ca3af !important; }
+
+html.light .el-input__inner, html.light .el-textarea__inner {
+    color: #1f2937 !important; background-color: #f9fafb !important; border-color: #d1d5db !important;
+}
+html.dark .el-input__inner, html.dark .el-textarea__inner {
+    color: #e5e7eb !important; background-color: #374151 !important; border-color: #4b5563 !important;
+}
+
+html.light .el-input__inner::placeholder, html.light .el-textarea__inner::placeholder { color: #9ca3af !important; }
+html.dark .el-input__inner::placeholder, html.dark .el-textarea__inner::placeholder { color: #6b7280 !important; }
+
+html.light .el-date-editor .el-input__inner { color: #1f2937 !important; }
+html.dark .el-date-editor .el-input__inner { color: #e5e7eb !important; }
+html.light .el-select .el-input__inner { color: #1f2937 !important; } /* 确保 Select 输入框文字颜色 */
+html.dark .el-select .el-input__inner { color: #e5e7eb !important; } /* 确保 Select 输入框文字颜色 */
+
+html.light .el-switch__label { color: #374151 !important; }
+html.dark .el-switch__label { color: #d1d5db !important; }
+
+html.dark .el-dialog__footer .el-button.is-plain span, html.dark .el-drawer__footer .el-button.is-plain span {
+    color: #e5e7eb !important; 
+}
+/* Select 下拉面板 */
+html.dark .el-select-dropdown { background-color: #1e293b !important; border-color: #334155 !important; }
+html.dark .el-select-dropdown__item { color: #d1d5db !important; }
+html.dark .el-select-dropdown__item.hover, html.dark .el-select-dropdown__item:hover { background-color: #374151 !important; }
+html.dark .el-select-dropdown__item.selected { color: var(--el-color-primary) !important; background-color: rgba(var(--el-color-primary-rgb), 0.1) !important;}
+
+/* Date Picker 面板 (Element Plus 通常会自动适配，但可以加固) */
+html.dark .el-picker-panel {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+html.dark .el-date-picker__header-label, html.dark .el-date-table th, html.dark .el-date-table td .el-date-table-cell__text {
+  color: #d1d5db !important;
+}
+html.dark .el-date-picker__header--bordered {
+    border-bottom: 1px solid #334155 !important;
+}
+html.dark .el-date-table td.today .el-date-table-cell__text {
+  color: var(--el-color-primary) !important;
+}
+html.dark .el-picker-panel__icon-btn {
+  color: #9ca3af !important;
+}
+html.dark .el-date-table td.disabled div {
+  background-color: #374151 !important;
+  color: #6b7280 !important;
+}
+html.dark .el-picker-panel__footer .el-button.is-text {
+    color: var(--el-color-primary) !important;
+}
+html.dark .el-picker-panel__footer .el-button.is-plain {
+    color: #d1d5db !important;
+    border-color: #4b5563 !important;
+}
+html.dark .el-picker-panel__footer .el-button.is-plain:hover {
+    color: var(--el-color-primary) !important;
+    border-color: var(--el-color-primary) !important;
+    background-color: rgba(var(--el-color-primary-rgb), 0.1) !important;
+}
 </style>
 
 <style scoped>
@@ -415,24 +473,22 @@ html.dark .el-dialog__body { color: #c3c4c7 !important; } /* 比输入框文字�
     background-color: #1e293b; border-color: #334155;
 }
 
-/* --- 表格特定样式 (文字颜色随主题变化 - 已修正) --- */
+/* --- 表格特定样式 (文字颜色随主题变化) --- */
 :deep(.el-table), :deep(.el-table__expanded-cell) { background-color: transparent !important; }
 :deep(.el-table th), :deep(.el-table tr), :deep(.el-table td) {
     background-color: transparent !important; text-shadow: none !important;
     transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
 
-/* 浅色主题表格文字和边框 */
+/* 通过全局 html.light/dark 类控制表格文字和边框颜色 */
 html.light :deep(.el-table th .cell),
 html.light :deep(.el-table td .cell) { color: #31353a !important; }
 html.light :deep(.el-table th), html.light :deep(.el-table td) { border-color: #e0e0e0 !important; }
 
-/* 深色主题表格文字和边框 */
 html.dark :deep(.el-table th .cell),
 html.dark :deep(.el-table td .cell) { color: #f0f2f5 !important; }
 html.dark :deep(.el-table th), html.dark :deep(.el-table td) { border-color: #404a58 !important; }
 
-/* 行悬停效果 */
 html.light :deep(.el-table__row:hover td) { background-color: rgba(0, 0, 0, 0.04) !important; }
 html.dark :deep(.el-table__row:hover td) { background-color: rgba(255, 255, 255, 0.06) !important; }
 
