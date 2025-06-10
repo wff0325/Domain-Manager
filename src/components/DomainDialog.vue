@@ -44,12 +44,20 @@
           <el-option label="其他" value="其他" />
         </el-select>
       </el-form-item>
-      <!-- 修正：恢复了 TG 通知和状态通知的开关 -->
+      <!-- 修正：为 el-switch 添加 active-value 和 inactive-value -->
       <el-form-item label="TG通知" prop="tgsend">
-        <el-switch v-model="formData.tgsend" />
+        <el-switch
+          v-model="formData.tgsend"
+          :active-value="1"
+          :inactive-value="0"
+        />
       </el-form-item>
       <el-form-item label="状态通知" prop="st_tgsend">
-        <el-switch v-model="formData.st_tgsend" />
+        <el-switch
+          v-model="formData.st_tgsend"
+          :active-value="1"
+          :inactive-value="0"
+        />
       </el-form-item>
       <el-form-item label="备注" prop="memo">
         <el-input v-model="formData.memo" type="textarea" placeholder="请输入备注" />
@@ -78,7 +86,7 @@ const props = defineProps<{
 const emit = defineEmits(['update:visible', 'submit']);
 
 const formRef = ref<FormInstance>();
-// 修正：在 initialFormData 中补全了 tgsend 和 st_tgsend 字段
+// 修正：将 tgsend 和 st_tgsend 的默认值改为数字 0
 const initialFormData: Omit<DomainData, 'id' | 'created_at'> = {
   domain: '',
   registrar: '',
@@ -88,8 +96,8 @@ const initialFormData: Omit<DomainData, 'id' | 'created_at'> = {
   service_type: '',
   status: '在线',
   memo: '',
-  tgsend: false,
-  st_tgsend: false
+  tgsend: 0,
+  st_tgsend: 0
 };
 const formData = ref({ ...initialFormData });
 
@@ -110,7 +118,6 @@ watch(() => props.visible, (newVal) => {
       formData.value = { ...initialFormData };
     }
   } else {
-    // 关闭时重置表单验证状态
     formRef.value?.resetFields();
   }
 });
@@ -134,10 +141,9 @@ const handleSubmit = async () => {
 
 <style scoped>
 /*
- * 关键修正：移除所有写死的颜色和背景
- * 让对话框的样式完全由全局主题 (html.light/dark) 控制
+ * 此处无需样式，对话框将完全由 Home.vue 中的全局样式控制
 */
 .domain-dialog {
-  /* 这里不需要任何颜色相关的样式 */
+  /* No local styles needed */
 }
 </style>
