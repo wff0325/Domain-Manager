@@ -129,7 +129,6 @@
     </div>
 </template>
 <script setup lang="ts">
-// All Javascript code from the previous step remains the same.
 import { ref, onMounted, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -433,7 +432,8 @@ const handleExport = async () => {
         })
 
         if (!response.ok) {
-            const errorData = await response.json()
+            // FIX: Assert the type of the error object to resolve the TS error.
+            const errorData = await response.json() as { message: string };
             throw new Error(errorData.message || '导出失败')
         }
 
