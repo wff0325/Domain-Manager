@@ -130,7 +130,6 @@ import AlertConfigDialog from '../components/AlertConfigDialog.vue'
 import ImportDialog from '../components/ImportDialog.vue'
 import { createDomain, updateDomain, deleteDomain, type DomainData } from '../api/domains'
 
-// --- 类型定义 ---
 type Domain = DomainData;
 type Theme = 'light' | 'dark' | 'system';
 
@@ -139,22 +138,18 @@ interface AlertConfig {
     tg_userid: string;
     days: number;
 }
-
 interface ApiSuccessResponse<T> {
     status: 200;
     message: string;
     data: T;
 }
-
 interface ApiErrorResponse {
     status: number;
     message: string;
     data: null;
 }
-
 type GenericApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
-// --- 主题管理 ---
 const theme = ref<Theme>((localStorage.getItem('theme') as Theme) || 'system');
 const effectiveDarkMode = computed(() => {
     if (theme.value === 'system') {
@@ -172,7 +167,6 @@ const setTheme = (newTheme: Theme) => {
     applyTheme(effectiveDarkMode.value);
 };
 
-// --- 响应式状态 ---
 const router = useRouter();
 const auth = useAuth();
 const domains = ref<Domain[]>([]);
@@ -185,7 +179,6 @@ const isEdit = ref(false);
 const editData = ref<Domain | undefined>();
 const importVisible = ref(false);
 
-// --- 函数 ---
 const checkLoginStatus = () => {
     const token = auth.getAuthToken();
     if (!token) {
@@ -242,9 +235,7 @@ const loadDomains = async () => {
         const response = await fetch('/api/domains', {
             headers: { 'Authorization': `Bearer ${authData.token}` }
         });
-
         const result: GenericApiResponse<Domain[]> = await response.json();
-
         if (result.status !== 200) {
             throw new Error(result.message || '请求失败');
         }
@@ -278,15 +269,11 @@ const handleConfigSubmit = async (config: AlertConfig) => {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
             body: JSON.stringify(config)
         });
-        
         const result: GenericApiResponse<AlertConfig> = await response.json();
-
-        if (result.status === 200) {
+        if (result.status === 200 && result.data) {
             ElMessage.success('配置保存成功');
-            if (result.data) {
-                alertDays.value = result.data.days;
-                alertConfig.value = result.data;
-            }
+            alertDays.value = result.data.days;
+            alertConfig.value = result.data;
         } else {
             throw new Error(result.message || '保存失败');
         }
@@ -302,12 +289,10 @@ const loadAlertConfig = async () => {
     try {
         const authData = auth.getAuthToken()
         if (!authData) return;
-
         const response = await fetch('/api/alertconfig', {
             headers: { 'Authorization': `Bearer ${authData.token}` }
         })
         const result: GenericApiResponse<AlertConfig> = await response.json()
-
         if (result.status === 200 && result.data) {
             alertConfig.value = result.data
             alertDays.value = result.data.days
@@ -362,7 +347,7 @@ const handleRefresh = async () => {
                 return await updateDomainStatus(domain.domain, status);
             } catch (error) {
                 console.error(`刷新域名 ${domain.domain} 失败:`, error);
-                return domain; // 如果单个域名刷新失败，返回原数据，避免整个流程中断
+                return domain;
             }
         });
         const updatedDomains = await Promise.all(statusChecks);
@@ -447,7 +432,7 @@ onMounted(() => {
 }
 
 #live2d-widget {
-    z-index: 1 !important;
+    z-index: 5 !important; /* 确保它在背景之上，但在内容之下 */
     pointer-events: none !important;
 }
 
@@ -463,54 +448,47 @@ onMounted(() => {
     min-height: 100vh;
     box-sizing: border-box;
     padding: 20px;
+    background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg');
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
-    transition: background-color 0.5s ease;
     position: relative;
-    color: #303133;
+    overflow: hidden; /* 防止子元素溢出 */
 }
+
+/* 颜色遮罩层 */
 .home-container::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    z-index: -1;
-}
-.home-container::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(255, 255, 255, 0.3);
-    z-index: -1;
+    background-color: rgba(255, 255, 255, 0.1); /* 日间模式的浅色遮罩 */
+    z-index: 1; /* 在背景图之上 */
     transition: background-color 0.5s ease;
 }
-.home-container.dark-mode {
-    color: #E5EAF3;
-}
-.home-container.dark-mode::after {
-    background-color: rgba(0, 0, 0, 0.5);
+.home-container.dark-mode::before {
+    background-color: rgba(0, 0, 0, 0.4); /* 夜间模式的深色遮罩 */
 }
 
-/* --- 不透明面板 --- */
+/* --- 透明磨砂玻璃面板 --- */
 .header, .custom-table, .footer {
     position: relative;
-    z-index: 10;
-    background-color: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    z-index: 10; /* 确保内容在遮罩和宠物之上 */
+    /* 核心回归：带回用户最爱的磨砂玻璃质感 */
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
     transition: background-color 0.5s, border-color 0.5s;
+    /* 彻底解决可读性：面板内的文字颜色独立于全局 */
+    color: #333;
 }
 .dark-mode .header, .dark-mode .custom-table, .dark-mode .footer {
-    background-color: rgba(30, 30, 30, 0.75);
-    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #eaeaea;
 }
 
 /* --- 元素样式 --- */
@@ -518,54 +496,58 @@ onMounted(() => {
     display: flex; flex-wrap: wrap; gap: 15px;
     align-items: center; justify-content: space-between; padding: 5px 20px;
 }
-.dark-mode .header { color: #fff; }
+/* RGB 标题在暗黑模式下需要更亮 */
+.dark-mode .neon-title { text-shadow: 1px 1px 5px rgba(255, 255, 255, 0.2); }
 
 /* 表格样式 */
 .custom-table {
-    --el-table-border-color: rgba(0,0,0,0.1);
+    /* 覆盖 Element Plus 的边框颜色变量 */
+    --el-table-border-color: rgba(0,0,0,0.15);
 }
 .dark-mode .custom-table {
     --el-table-border-color: rgba(255,255,255,0.15);
 }
 :deep(.el-table),
-:deep(.el-table__expanded-cell) {
-    background-color: transparent !important;
-}
+:deep(.el-table__expanded-cell),
 :deep(.el-table th),
 :deep(.el-table tr),
 :deep(.el-table td) {
     background-color: transparent !important;
-    color: inherit !important;
+    color: inherit !important; /* 让文字颜色跟随父容器，实现主题切换 */
 }
 :deep(.el-table th) {
     font-weight: bold;
 }
 :deep(.el-table__row:hover td) {
-    background-color: rgba(0, 0, 0, 0.03) !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
 }
 .dark-mode :deep(.el-table__row:hover td) {
     background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* 链接和状态文本 */
+/* 链接和状态文本，颜色更鲜明 */
 .link { color: #0056b3; text-decoration: none; font-weight: bold; }
 .dark-mode .link { color: #8ab4f8; }
 .link:hover { text-decoration: underline; }
 
-.warning-text { color: #c85a17; font-weight: bold; }
+.warning-text { color: #b95000; font-weight: bold; }
 .dark-mode .warning-text { color: #fdd835; }
-.success-text { color: #22863a; font-weight: bold; }
+.success-text { color: #1e8e3e; font-weight: bold; }
 .dark-mode .success-text { color: #81c784; }
-.danger-text { color: #d73a49; font-weight: bold; }
+.danger-text { color: #c93333; font-weight: bold; }
 .dark-mode .danger-text { color: #ef9a9a; }
 
 /* 页脚 */
 .footer {
     position: fixed; bottom: 0; left: 0; right: 0;
-    margin: 0; padding: 10px; border-radius: 0;
-    box-shadow: none; border: none; border-top: 1px solid rgba(0,0,0,0.05);
+    margin: 0; padding: 10px;
+    border-radius: 0;
+    box-shadow: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
 }
-.dark-mode .footer { border-top: 1px solid rgba(255,255,255,0.1); }
+.dark-mode .footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
 .footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; text-align: center; }
 .copyright, .separator, .social-link { color: inherit; }
 </style>
