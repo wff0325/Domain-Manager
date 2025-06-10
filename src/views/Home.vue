@@ -86,7 +86,7 @@
         <DomainDialog v-model:visible="dialogVisible" :is-edit="isEdit" :edit-data="editData"
             @submit="handleDialogSubmit" />
 
-        <AlertConfigDialog v-model:visible="configVisible" :config="alertConfig" @submit="handleConfigSubmit" />
+        <AlertConfigDialog v-model:visible="configVisible" :config="alertConfig || undefined" @submit="handleConfigSubmit" />
 
         <ImportDialog v-model:visible="importVisible" @success="loadDomains" />
 
@@ -283,8 +283,10 @@ const handleConfigSubmit = async (config: AlertConfig) => {
 
         if (result.status === 200) {
             ElMessage.success('配置保存成功');
-            alertDays.value = config.days;
-            alertConfig.value = result.data;
+            if (result.data) {
+                alertDays.value = result.data.days;
+                alertConfig.value = result.data;
+            }
         } else {
             throw new Error(result.message || '保存失败');
         }
@@ -324,10 +326,10 @@ const checkDomainStatus = async (domain: string): Promise<string> => {
             body: JSON.stringify({ domain })
         });
         const result: GenericApiResponse<{ status: string }> = await response.json();
-        if (result.status === 200) {
+        if (result.status === 200 && result.data) {
             return result.data.status;
         } else {
-            throw new Error(result.message || '检查失败');
+            return '离线';
         }
     } catch (error) {
         console.error(`检查域名 ${domain} 状态失败:`, error);
@@ -343,10 +345,10 @@ const updateDomainStatus = async (domain: string, status: string): Promise<Domai
         body: JSON.stringify({ domain, status })
     });
     const result: GenericApiResponse<Domain> = await response.json();
-    if (result.status === 200) {
+    if (result.status === 200 && result.data) {
         return result.data;
     } else {
-        throw new Error(result.message || '更新失败');
+        throw new Error(result.message || '更新状态失败或返回数据为空');
     }
 };
 const handleRefresh = async () => {
@@ -355,8 +357,13 @@ const handleRefresh = async () => {
         refreshing.value = true;
         ElMessage.info('正在检查域名状态...');
         const statusChecks = domains.value.map(async (domain) => {
-            const status = await checkDomainStatus(domain.domain);
-            return await updateDomainStatus(domain.domain, status);
+            try {
+                const status = await checkDomainStatus(domain.domain);
+                return await updateDomainStatus(domain.domain, status);
+            } catch (error) {
+                console.error(`刷新域名 ${domain.domain} 失败:`, error);
+                return domain; // 如果单个域名刷新失败，返回原数据，避免整个流程中断
+            }
         });
         const updatedDomains = await Promise.all(statusChecks);
         domains.value = updatedDomains;
@@ -374,7 +381,7 @@ const handleRefresh = async () => {
 const handleImport = () => { importVisible.value = true };
 const handleExport = async () => {
     try {
-        const authData = auth.getAuthToken()
+        const authData = auth.getAuthToken();
         if (!authData) throw new Error('未登录或登录已过期');
         const loading = ElMessage.info({ message: '正在准备导出数据...', duration: 0 });
         const response = await fetch('/api/domains/export', { headers: { 'Authorization': `Bearer ${authData.token}` } });
@@ -414,6 +421,7 @@ onMounted(() => {
     loadDomains();
     loadAlertConfig();
 });
+
 </script>
 
 <style>
