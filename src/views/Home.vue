@@ -27,9 +27,9 @@
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
-                <!-- New Settings Button -->
-                <el-tooltip content="系统设置" placement="bottom">
-                     <el-button type="primary" size="small" :icon="Setting" @click="settingsDrawerVisible = true">设置</el-button>
+                <!-- CORRECTED: Renamed button to "主题" -->
+                <el-tooltip content="主题设置" placement="bottom">
+                     <el-button type="primary" size="small" :icon="Setting" @click="settingsDrawerVisible = true">主题</el-button>
                 </el-tooltip>
                 <el-tooltip content="登出系统" placement="bottom">
                     <el-button type="primary" size="small" :icon="SwitchButton" @click="handleLogout">登出</el-button>
@@ -37,7 +37,6 @@
             </div>
         </div>
         
-        <!-- Main Content Table -->
         <el-table :data="domains" border style="width: 100%" class="custom-table">
             <el-table-column label="域名" align="center" sortable>
                 <template #default="scope">
@@ -49,17 +48,19 @@
                     <a :href="scope.row.registrar_link" target="_blank" class="link">{{ scope.row.registrar }}</a>
                 </template>
             </el-table-column>
-            <el-table-column prop="registrar_date" label="注册时间" align="center" sortable class-name="yellow-text-cell" />
-            <el-table-column prop="expiry_date" label="过期时间" align="center" sortable class-name="yellow-text-cell" />
+            <!-- CORRECTED: Removed yellow-text-cell class -->
+            <el-table-column prop="registrar_date" label="注册时间" align="center" sortable />
+            <el-table-column prop="expiry_date" label="过期时间" align="center" sortable />
             <el-table-column label="剩余时间" align="center" sortable
                 :sort-method="(a, b) => calculateRemainingDays(a.expiry_date) - calculateRemainingDays(b.expiry_date)">
                 <template #default="scope">
-                    <span :class="['yellow-text-cell', { 'warning-text': calculateRemainingDays(scope.row.expiry_date) <= alertDays }]">
+                    <!-- CORRECTED: Removed yellow-text-cell class -->
+                    <span :class="{ 'warning-text': calculateRemainingDays(scope.row.expiry_date) <= alertDays }">
                         {{ calculateRemainingDays(scope.row.expiry_date) }}天
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column prop="service_type" label="服务类型" align="center" sortable class-name="yellow-text-cell" />
+            <el-table-column prop="service_type" label="服务类型" align="center" sortable />
             <el-table-column prop="status" label="状态" align="center" sortable>
                 <template #default="scope">
                     <span :class="scope.row.status === '在线' ? 'success-text' : 'danger-text'">
@@ -67,7 +68,7 @@
                     </span>
                 </template>
             </el-table-column>
-            <el-table-column prop="memo" label="备注" align="center" sortable class-name="yellow-text-cell" />
+            <el-table-column prop="memo" label="备注" align="center" sortable />
             <el-table-column label="操作" width="200" align="center">
                 <template #default="scope">
                     <el-button type="primary" size="small" :icon="Edit" @click="handleEdit(scope.row)">修改</el-button>
@@ -81,8 +82,8 @@
         <AlertConfigDialog v-model:visible="configVisible" :config="alertConfig" @submit="handleConfigSubmit" />
         <ImportDialog v-model:visible="importVisible" @success="loadDomains" />
 
-        <!-- New Settings Drawer -->
-        <el-drawer v-model="settingsDrawerVisible" title="系统设置" direction="rtl" size="300px">
+        <!-- Settings Drawer -->
+        <el-drawer v-model="settingsDrawerVisible" title="主题设置" direction="rtl" size="300px">
             <div class="settings-container">
                 <el-divider>主题模式</el-divider>
                 <el-radio-group v-model="theme" class="settings-group">
@@ -113,7 +114,8 @@
 
         <footer class="footer">
             <div class="footer-content">
-                <!-- Footer content remains the same -->
+                 <span>© 2025 Domains-Support v1.0.5</span>
+                 <!-- ... other footer content -->
             </div>
         </footer>
     </div>
@@ -142,7 +144,7 @@ interface ApiResponse<T = any> {
     data: T;
 }
 
-// --- App Settings Logic (Nezha-style) ---
+// --- App Settings Logic ---
 const settingsDrawerVisible = ref(false);
 const theme = ref(localStorage.getItem('theme') || 'system');
 const accentColor = ref(localStorage.getItem('accentColor') || '#409EFF');
@@ -151,12 +153,10 @@ const isDarkMode = ref(false);
 
 const accentColors = ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#909399'];
 
-// Watch for changes in settings and save to localStorage
 watch(theme, (newTheme) => localStorage.setItem('theme', newTheme));
 watch(accentColor, (newColor) => localStorage.setItem('accentColor', newColor));
 watch(panelStyle, (newStyle) => localStorage.setItem('panelStyle', newStyle));
 
-// Apply theme and accent color to the document
 const applySettings = () => {
     if (theme.value === 'system') {
         isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -175,7 +175,6 @@ const panelStyleClass = computed(() => `panel-style-${panelStyle.value}`);
 
 onMounted(() => {
     applySettings();
-    // FIX: Removed unused 'e' parameter
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         if (theme.value === 'system') {
             applySettings();
@@ -185,7 +184,7 @@ onMounted(() => {
 
 watch([theme, accentColor], applySettings);
 
-// --- Existing component logic ---
+// --- Component Logic ---
 const router = useRouter();
 const auth = useAuth();
 const domains = ref<DomainData[]>([]);
@@ -198,6 +197,7 @@ const isEdit = ref(false);
 const editData = ref<DomainData>();
 const importVisible = ref(false);
 
+// ... All other Javascript functions remain the same as the previous correct version ...
 const checkLoginStatus = () => {
     if (!auth.getAuthToken()) {
         router.push({ name: 'Login' });
@@ -262,12 +262,10 @@ const loadDomains = async () => {
         });
 
         if (!response.ok) {
-            // FIX: Added type assertion for error object
             const errorData = await response.json() as { message: string };
             throw new Error(errorData.message || '请求失败');
         }
 
-        // FIX: Added type assertion for success response
         const result = await response.json() as ApiResponse<DomainData[]>;
         if (result.status !== 200) {
             throw new Error(result.message || '请求失败');
@@ -308,7 +306,6 @@ const handleConfigSubmit = async (config: AlertConfig) => {
             body: JSON.stringify(config)
         });
 
-        // FIX: Added type assertion
         const result = await response.json() as ApiResponse;
         if (result.status === 200) {
             ElMessage.success('配置保存成功');
@@ -337,7 +334,6 @@ const updateDomainStatus = async (domain: string, status: string): Promise<Domai
         body: JSON.stringify({ domain, status })
     });
 
-    // FIX: Added type assertion
     const result = await response.json() as ApiResponse<DomainData>;
     if (result.status === 200 && result.data) {
         return result.data;
@@ -356,7 +352,6 @@ const checkDomainStatus = async (domain: string): Promise<string> => {
             body: JSON.stringify({ domain })
         });
         
-        // FIX: Added type assertion
         const result = await response.json() as ApiResponse<{ status: string }>;
         return result.status === 200 && result.data ? result.data.status : '离线';
     } catch (error) {
@@ -394,7 +389,6 @@ const loadAlertConfig = async () => {
             headers: { 'Authorization': `Bearer ${authData.token}` }
         });
         
-        // FIX: Added type assertion
         const result = await response.json() as ApiResponse<AlertConfig>;
         if (result.status === 200 && result.data) {
             alertConfig.value = result.data;
@@ -440,6 +434,7 @@ const handleExport = async () => {
     }
 };
 
+
 onMounted(() => {
     checkLoginStatus();
     loadDomains();
@@ -448,12 +443,8 @@ onMounted(() => {
 
 </script>
 
-<style>
-/* ... Global styles remain the same ... */
-</style>
-
 <style scoped>
-/* ... Scoped styles remain the same ... */
+/* CORRECTED: Simplified background logic for reliability */
 .home-container {
     min-height: 100vh;
     box-sizing: border-box;
@@ -461,14 +452,11 @@ onMounted(() => {
     background-size: cover;
     background-position: center center;
     background-attachment: fixed;
-    transition: background-image 0.5s ease-in-out, background-color 0.3s;
-}
-
-.home-container:not(.dark-mode) {
+    transition: background-image 0.5s ease-in-out;
     background-image: url('https://wp.upx8.com/api.php?content=%E5%8A%A8%E6%BC%AB');
 }
 .home-container.dark-mode {
-    background-image: url('https://images.unsplash.com/photo-1532372576444-39321318F8a7?w=1200');
+    background-image: url('https://images.unsplash.com/photo-1533119428433-b27b858f523a');
 }
 
 .header, .custom-table, .footer {
@@ -484,7 +472,7 @@ onMounted(() => {
 .panel-style-misty .header, 
 .panel-style-misty .custom-table, 
 .panel-style-misty .footer {
-    background-color: rgba(0, 0, 0, 0.45); 
+    background-color: rgba(255, 255, 255, 0.45); 
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
@@ -498,105 +486,93 @@ onMounted(() => {
 .panel-style-solid .custom-table,
 .panel-style-solid .footer {
     backdrop-filter: none;
-    background-color: rgba(245, 247, 250, 0.85);
+    background-color: #ffffff;
 }
 .dark-mode.panel-style-solid .header,
 .dark-mode.panel-style-solid .custom-table,
 .dark-mode.panel-style-solid .footer {
-    background-color: rgba(40, 40, 40, 0.9);
+    background-color: #2c2c2c;
 }
 
 .header {
     display: flex; flex-wrap: wrap; gap: 15px;
     align-items: center; justify-content: space-between; padding: 5px 20px;
 }
-.header h2 { margin: 0; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
 :deep(.el-table),
 :deep(.el-table__expanded-cell) {
     background-color: transparent !important;
 }
+
+/* Base text color for Misty panels */
 :deep(.el-table th),
 :deep(.el-table tr),
 :deep(.el-table td) {
     background-color: transparent !important;
-    color: #fff !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    text-shadow: 0 0 4px #000, 0 0 4px #000;
-}
-.panel-style-solid :deep(.el-table th),
-.panel-style-solid :deep(.el-table tr),
-.panel-style-solid :deep(.el-table td) {
-    color: #606266 !important;
+    border-color: rgba(0, 0, 0, 0.2) !important;
+    color: #303133 !important; /* Default to dark text for light misty panel */
     text-shadow: none;
 }
-.dark-mode.panel-style-solid :deep(.el-table th),
-.dark-mode.panel-style-solid :deep(.el-table tr),
-.dark-mode.panel-style-solid :deep(.el-table td) {
+.dark-mode :deep(.el-table th),
+.dark-mode :deep(.el-table tr),
+.dark-mode :deep(.el-table td) {
+    color: #E5EAF3 !important; /* Light text for dark panels */
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    text-shadow: 0 0 3px #000;
+}
+
+/* Text color for Solid panels */
+.panel-style-solid :deep(.el-table td),
+.panel-style-solid :deep(.el-table th) {
+    color: #303133 !important;
+}
+.dark-mode.panel-style-solid :deep(.el-table td),
+.dark-mode.panel-style-solid :deep(.el-table th) {
     color: #E5EAF3 !important;
 }
 
 :deep(.el-table__row:hover td) {
-    background-color: rgba(255, 255, 255, 0.15) !important;
-}
-.panel-style-solid :deep(.el-table__row:hover td) {
     background-color: rgba(0, 0, 0, 0.05) !important;
 }
+.dark-mode :deep(.el-table__row:hover td) {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
 
-:deep(td.yellow-text-cell .cell),
-.yellow-text-cell {
-    color: #FFEB3B !important;
+/* CORRECTED: Removed all yellow-text styles */
+.warning-text { 
+    color: #E6A23C !important;
     font-weight: bold;
 }
-.warning-text { 
+.dark-mode .warning-text {
     color: #ffd54f !important;
 }
+
 .link { color: var(--el-color-primary); text-decoration: none; font-weight: bold; }
 .link:hover { opacity: 0.8; }
-.success-text { color: #a5d6a7; font-weight: bold; }
-.danger-text { color: #ef9a9a; font-weight: bold; }
+.success-text { color: #67C23A; font-weight: bold; }
+.danger-text { color: #F56C6C; font-weight: bold; }
+.dark-mode .success-text { color: #a5d6a7; }
+.dark-mode .danger-text { color: #ef9a9a; }
 
 .footer {
     position: fixed; bottom: 0; left: 0; right: 0;
     padding: 10px; margin: 0; border-radius: 0;
-    color: #eee; text-shadow: 0 0 3px #000;
-}
-.panel-style-solid .footer {
     color: #303133;
     text-shadow: none;
 }
-.dark-mode.panel-style-solid .footer {
+.dark-mode .footer {
     color: #E5EAF3;
+    text-shadow: 0 0 3px #000;
 }
 
-.settings-container {
-    padding: 0 10px;
-}
-.settings-group {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 10px;
-}
-.color-picker {
-    display: flex;
-    justify-content: space-evenly;
-    padding: 10px 0;
-}
+.settings-container { padding: 0 10px; }
+.settings-group { display: flex; justify-content: center; width: 100%; margin-top: 10px; }
+.color-picker { display: flex; justify-content: space-evenly; padding: 10px 0; }
 .color-swatch {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: transform 0.2s, border-color 0.2s;
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: transform 0.2s, border-color 0.2s;
 }
-.color-swatch:hover {
-    transform: scale(1.1);
-}
-.color-swatch.active {
-    border-color: var(--el-color-primary);
-    transform: scale(1.2);
-}
+.color-swatch:hover { transform: scale(1.1); }
+.color-swatch.active { border-color: var(--el-color-primary); transform: scale(1.2); }
 </style>
