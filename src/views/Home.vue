@@ -118,6 +118,8 @@
 </template>
 
 <script setup lang="ts">
+// All your Javascript code from before remains unchanged.
+// Just copy and paste it here.
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -157,9 +159,6 @@ const importVisible = ref(false)
 
 const isDarkMode = ref(localStorage.getItem('darkMode') === 'true')
 
-// ... [The rest of your <script setup> block remains unchanged] ...
-// ... [为了简洁，我在这里省略了未改动的JS代码，请使用您原来的JS代码] ...
-// ... [HandleLogout, handleAdd, handleDelete, etc. all stay the same] ...
 const checkLoginStatus = () => {
     const token = auth.getAuthToken()
     if (!token) {
@@ -507,7 +506,6 @@ onMounted(() => {
     loadDomains()
     loadAlertConfig()
 })
-
 </script>
 
 <style>
@@ -517,14 +515,12 @@ onMounted(() => {
     font-weight: normal;
     font-size: 2.2rem;
     position: relative;
-    /* 核心修改：移除描边，直接使用渐变文字 */
     background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
     background-size: 400% 100%;
     -webkit-background-clip: text;
     background-clip: text;
-    color: transparent; /* 文字设为透明，以显示背景 */
+    color: transparent;
     animation: gradientFlow 5s linear infinite;
-    /* 为清晰度添加一点阴影 */
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 
@@ -532,6 +528,12 @@ onMounted(() => {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+/* 核心修复：用全局样式控制宠物图层和交互 */
+#live2d-widget {
+    z-index: 1 !important; /* 将宠物放在较低的图层 */
+    pointer-events: none !important; /* 让鼠标可以穿透宠物模型 */
 }
 
 .dark {
@@ -544,12 +546,9 @@ onMounted(() => {
 /* --- 背景和布局 --- */
 .home-container {
     min-height: 100vh;
-    box-sizing: border-box; /* 确保 padding 不会撑大容器 */
-    
-    /* 核心修复：为宠物留出左侧空间 */
-    padding: 20px 20px 80px 240px; /* 上 右 下 左 */
-
-    /* 默认日间模式背景 */
+    box-sizing: border-box;
+    /* 核心修复：恢复居中布局，不再为宠物留白 */
+    padding: 20px 20px 80px 20px;
     background-image: url('https://wp.upx8.com/api.php?content=%E5%8A%A8%E6%BC%AB');
     background-size: cover;
     background-position: center center;
@@ -557,36 +556,36 @@ onMounted(() => {
     transition: background-image 0.5s ease-in-out;
 }
 .home-container.dark-mode {
-    /* 核心修复：暗黑模式使用一张明确的暗色调壁纸 */
     background-image: url('https://w.wallhaven.cc/full/we/wallhaven-wexqj6.jpg');
 }
 
-
 /* --- 透明磨砂玻璃面板效果 --- */
 .header, .custom-table, .footer {
-    /* 核心修复：增加背景暗度，提升对比度 */
+    /* 核心修复：添加 position 和 z-index，让内容浮在宠物之上 */
+    position: relative;
+    z-index: 10;
+    
     background-color: rgba(0, 0, 0, 0.45); 
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 12px;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    margin-bottom: 20px; /* 统一间距 */
 }
 .dark-mode .header, .dark-mode .custom-table, .dark-mode .footer {
     background-color: rgba(0, 0, 0, 0.6);
-    border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* --- 元素样式调整以适应新背景 --- */
+/* --- 元素样式调整 --- */
 .header {
-    display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
+    display: flex; flex-wrap: wrap; gap: 15px;
     align-items: center; justify-content: space-between; padding: 5px 20px;
 }
 .header h2 { margin: 0; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
 /* 表格透明化 */
-.custom-table { margin-bottom: 60px; overflow-x: auto; }
 :deep(.el-table),
 :deep(.el-table__expanded-cell) {
     background-color: transparent !important;
@@ -597,27 +596,29 @@ onMounted(() => {
     background-color: transparent !important;
     color: #fff !important;
     border-color: rgba(255, 255, 255, 0.2) !important;
-    /* 核心修复：为所有表格文字添加描边，确保清晰 */
-    text-shadow: 0 0 3px #000, 0 0 3px #000;
+    text-shadow: 0 0 4px #000, 0 0 4px #000;
 }
 :deep(.el-table__row:hover td) {
     background-color: rgba(255, 255, 255, 0.15) !important;
 }
 
-/* 调整链接和状态文本颜色和阴影 */
-.link { color: #82b1ff; text-decoration: none; font-weight: bold; }
-.link:hover { color: #c8e6c9; }
+/* 链接和状态文本 */
+.link { color: #90caf9; text-decoration: none; font-weight: bold; }
+.link:hover { color: #e3f2fd; }
 
-.warning-text { color: #ffe57f; font-weight: bold; }
-.success-text { color: #b9f6ca; font-weight: bold; }
-.danger-text { color: #ffcdd2; font-weight: bold; }
+.warning-text { color: #ffd54f; font-weight: bold; }
+.success-text { color: #a5d6a7; font-weight: bold; }
+.danger-text { color: #ef9a9a; font-weight: bold; }
 
 /* --- 页脚样式 --- */
 .footer {
-    position: fixed; bottom: 0; right: 0;
-    /* 核心修复：让页脚也遵守左侧边距 */
-    left: 240px; 
-    padding: 16px;
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    right: 0;
+    padding: 10px;
+    margin: 0; /* 页脚不应有外边距 */
+    border-radius: 0; /* 页脚通常是直角 */
     color: #eee;
     text-shadow: 0 0 3px #000;
 }
@@ -626,6 +627,6 @@ onMounted(() => {
 .separator { color: #dcdfe6; margin: 0 2px; }
 .social-links { display: flex; gap: 15px; align-items: center; }
 .social-link { color: #eee; transition: all 0.3s ease; }
-.social-link:hover { color: #82b1ff; transform: translateY(-2px); }
+.social-link:hover { color: #90caf9; transform: translateY(-2px); }
 .social-icon { width: 20px; height: 20px; }
 </style>
