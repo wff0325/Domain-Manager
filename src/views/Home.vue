@@ -1,5 +1,5 @@
 <template>
-    <div class="home-container" :class="[isDarkMode ? 'dark-mode' : '', panelStyleClass]">
+    <div class="home-container" :class="[isDarkMode ? 'dark' : 'light', panelStyleClass]">
         <div class="header">
             <h2 class="neon-title" data-text="域名管理系统(Domains-Support)">域名管理系统(Domains-Support)</h2>
             <div class="header-buttons">
@@ -27,7 +27,6 @@
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
-                <!-- CORRECTED: Renamed button to "主题" -->
                 <el-tooltip content="主题设置" placement="bottom">
                      <el-button type="primary" size="small" :icon="Setting" @click="settingsDrawerVisible = true">主题</el-button>
                 </el-tooltip>
@@ -48,13 +47,11 @@
                     <a :href="scope.row.registrar_link" target="_blank" class="link">{{ scope.row.registrar }}</a>
                 </template>
             </el-table-column>
-            <!-- CORRECTED: Removed yellow-text-cell class -->
             <el-table-column prop="registrar_date" label="注册时间" align="center" sortable />
             <el-table-column prop="expiry_date" label="过期时间" align="center" sortable />
             <el-table-column label="剩余时间" align="center" sortable
                 :sort-method="(a, b) => calculateRemainingDays(a.expiry_date) - calculateRemainingDays(b.expiry_date)">
                 <template #default="scope">
-                    <!-- CORRECTED: Removed yellow-text-cell class -->
                     <span :class="{ 'warning-text': calculateRemainingDays(scope.row.expiry_date) <= alertDays }">
                         {{ calculateRemainingDays(scope.row.expiry_date) }}天
                     </span>
@@ -77,12 +74,10 @@
             </el-table-column>
         </el-table>
 
-        <!-- Dialogs -->
         <DomainDialog v-model:visible="dialogVisible" :is-edit="isEdit" :edit-data="editData" @submit="handleDialogSubmit" />
         <AlertConfigDialog v-model:visible="configVisible" :config="alertConfig" @submit="handleConfigSubmit" />
         <ImportDialog v-model:visible="importVisible" @success="loadDomains" />
 
-        <!-- Settings Drawer -->
         <el-drawer v-model="settingsDrawerVisible" title="主题设置" direction="rtl" size="300px">
             <div class="settings-container">
                 <el-divider>主题模式</el-divider>
@@ -94,14 +89,7 @@
 
                 <el-divider>主题颜色</el-divider>
                 <div class="color-picker">
-                    <div
-                        v-for="color in accentColors"
-                        :key="color"
-                        class="color-swatch"
-                        :style="{ backgroundColor: color }"
-                        :class="{ active: accentColor === color }"
-                        @click="setAccentColor(color)"
-                    ></div>
+                    <div v-for="color in accentColors" :key="color" class="color-swatch" :style="{ backgroundColor: color }" :class="{ active: accentColor === color }" @click="setAccentColor(color)"></div>
                 </div>
 
                 <el-divider>面板样式</el-divider>
@@ -132,19 +120,9 @@ import AlertConfigDialog from '../components/AlertConfigDialog.vue';
 import ImportDialog from '../components/ImportDialog.vue';
 import { createDomain, updateDomain, deleteDomain, type DomainData } from '../api/domains';
 
-interface AlertConfig {
-    tg_token: string;
-    tg_userid: string;
-    days: number;
-}
+interface AlertConfig { tg_token: string; tg_userid: string; days: number; }
+interface ApiResponse<T = any> { status: number; message: string; data: T; }
 
-interface ApiResponse<T = any> {
-    status: number;
-    message: string;
-    data: T;
-}
-
-// --- App Settings Logic ---
 const settingsDrawerVisible = ref(false);
 const theme = ref(localStorage.getItem('theme') || 'system');
 const accentColor = ref(localStorage.getItem('accentColor') || '#409EFF');
@@ -163,28 +141,22 @@ const applySettings = () => {
     } else {
         isDarkMode.value = theme.value === 'dark';
     }
-    document.documentElement.classList.toggle('dark', isDarkMode.value);
+    // Apply class to the root <html> element
+    document.documentElement.className = isDarkMode.value ? 'dark' : '';
     document.documentElement.style.setProperty('--el-color-primary', accentColor.value);
 };
 
-const setAccentColor = (color: string) => {
-    accentColor.value = color;
-};
-
+const setAccentColor = (color: string) => { accentColor.value = color; };
 const panelStyleClass = computed(() => `panel-style-${panelStyle.value}`);
 
 onMounted(() => {
     applySettings();
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-        if (theme.value === 'system') {
-            applySettings();
-        }
+        if (theme.value === 'system') applySettings();
     });
 });
+watch([theme, accentColor], applySettings, { immediate: true });
 
-watch([theme, accentColor], applySettings);
-
-// --- Component Logic ---
 const router = useRouter();
 const auth = useAuth();
 const domains = ref<DomainData[]>([]);
@@ -197,29 +169,12 @@ const isEdit = ref(false);
 const editData = ref<DomainData>();
 const importVisible = ref(false);
 
-// ... All other Javascript functions remain the same as the previous correct version ...
-const checkLoginStatus = () => {
-    if (!auth.getAuthToken()) {
-        router.push({ name: 'Login' });
-    }
-};
-
-const handleLogout = () => {
-    auth.clearAuth();
-    router.push({ name: 'Login' });
-};
-
-const handleAdd = () => {
-    isEdit.value = false;
-    editData.value = undefined;
-    dialogVisible.value = true;
-};
-
-const handleEdit = (row: DomainData) => {
-    isEdit.value = true;
-    editData.value = row;
-    dialogVisible.value = true;
-};
+const checkLoginStatus = () => { if (!auth.getAuthToken()) router.push({ name: 'Login' }); };
+const handleLogout = () => { auth.clearAuth(); router.push({ name: 'Login' }); };
+const handleAdd = () => { isEdit.value = false; editData.value = undefined; dialogVisible.value = true; };
+const handleEdit = (row: DomainData) => { isEdit.value = true; editData.value = row; dialogVisible.value = true; };
+const handleConfig = () => { configVisible.value = true; };
+const handleImport = () => { importVisible.value = true; };
 
 const handleDelete = async (row: DomainData) => {
     try {
@@ -229,11 +184,7 @@ const handleDelete = async (row: DomainData) => {
             ElMessage.success('删除成功');
             await loadDomains();
         }
-    } catch (error) {
-        if (error !== 'cancel') {
-            ElMessage.error('删除失败');
-        }
-    }
+    } catch (error) { if (error !== 'cancel') ElMessage.error('删除失败'); }
 };
 
 const handleDialogSubmit = async (formData: Omit<DomainData, 'id' | 'created_at'>) => {
@@ -247,36 +198,24 @@ const handleDialogSubmit = async (formData: Omit<DomainData, 'id' | 'created_at'
         }
         dialogVisible.value = false;
         await loadDomains();
-    } catch (error: any) {
-        ElMessage.error(error.response?.data?.message || (isEdit.value ? '修改失败' : '添加失败'));
-    }
+    } catch (error: any) { ElMessage.error(error.response?.data?.message || '操作失败'); }
 };
 
 const loadDomains = async () => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) throw new Error('未登录或登录已过期');
-        
-        const response = await fetch('/api/domains', {
-            headers: { 'Authorization': `Bearer ${authData.token}` }
-        });
-
+        const response = await fetch('/api/domains', { headers: { 'Authorization': `Bearer ${authData.token}` } });
         if (!response.ok) {
             const errorData = await response.json() as { message: string };
             throw new Error(errorData.message || '请求失败');
         }
-
         const result = await response.json() as ApiResponse<DomainData[]>;
-        if (result.status !== 200) {
-            throw new Error(result.message || '请求失败');
-        }
+        if (result.status !== 200) throw new Error(result.message || '请求失败');
         domains.value = result.data || [];
     } catch (error: any) {
         ElMessage.error(error.message || '加载域名列表失败');
-        if (error.message.includes('授权') || error.message.includes('令牌')) {
-            auth.clearAuth();
-            router.push({ name: 'Login' });
-        }
+        if (error.message.includes('授权') || error.message.includes('令牌')) { auth.clearAuth(); router.push({ name: 'Login' }); }
     }
 };
 
@@ -288,89 +227,49 @@ const calculateRemainingDays = (expiryDate: string) => {
     return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 };
 
-const handleConfig = () => {
-    configVisible.value = true;
-};
-
 const handleConfigSubmit = async (config: AlertConfig) => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) throw new Error('未登录或登录已过期');
-
-        const response = await fetch('/api/alertconfig', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authData.token}`
-            },
-            body: JSON.stringify(config)
-        });
-
+        const response = await fetch('/api/alertconfig', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify(config) });
         const result = await response.json() as ApiResponse;
-        if (result.status === 200) {
-            ElMessage.success('配置保存成功');
-            alertDays.value = config.days;
-            alertConfig.value = config;
-        } else {
-            throw new Error(result.message || '保存失败');
-        }
+        if (result.status !== 200) throw new Error(result.message || '保存失败');
+        ElMessage.success('配置保存成功');
+        alertDays.value = config.days;
+        alertConfig.value = config;
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : '保存配置失败';
         ElMessage.error(errorMessage);
-        if (errorMessage.includes('授权') || errorMessage.includes('令牌')) {
-            auth.clearAuth();
-            router.push({ name: 'Login' });
-        }
-    }
-};
-
-const updateDomainStatus = async (domain: string, status: string): Promise<DomainData> => {
-    const authData = auth.getAuthToken();
-    if (!authData) throw new Error('未登录或登录已过期');
-
-    const response = await fetch('/api/domains/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
-        body: JSON.stringify({ domain, status })
-    });
-
-    const result = await response.json() as ApiResponse<DomainData>;
-    if (result.status === 200 && result.data) {
-        return result.data;
-    }
-    throw new Error(result.message || '更新失败');
-};
-
-const checkDomainStatus = async (domain: string): Promise<string> => {
-    try {
-        const authData = auth.getAuthToken();
-        if (!authData) throw new Error('未登录或登录已过期');
-
-        const response = await fetch('/api/domains/check', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` },
-            body: JSON.stringify({ domain })
-        });
-        
-        const result = await response.json() as ApiResponse<{ status: string }>;
-        return result.status === 200 && result.data ? result.data.status : '离线';
-    } catch (error) {
-        console.error(`检查域名 ${domain} 状态失败:`, error);
-        return '离线';
+        if (errorMessage.includes('授权') || errorMessage.includes('令牌')) { auth.clearAuth(); router.push({ name: 'Login' }); }
     }
 };
 
 const handleRefresh = async () => {
     if (refreshing.value) return;
     refreshing.value = true;
+    ElMessage.info('正在检查域名状态...');
     try {
-        ElMessage.info('正在检查域名状态...');
-        const updatedDomains = await Promise.all(
-            domains.value.map(async (domain) => {
-                const status = await checkDomainStatus(domain.domain);
-                return await updateDomainStatus(domain.domain, status);
-            })
-        );
+        const checkDomainStatus = async (domain: string): Promise<string> => {
+            try {
+                const authData = auth.getAuthToken();
+                if (!authData) throw new Error('未授权');
+                const response = await fetch('/api/domains/check', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify({ domain }) });
+                const result = await response.json() as ApiResponse<{ status: string }>;
+                return result.status === 200 && result.data ? result.data.status : '离线';
+            } catch { return '离线'; }
+        };
+        const updateDomainStatus = async (domain: string, status: string): Promise<DomainData> => {
+            const authData = auth.getAuthToken();
+            if (!authData) throw new Error('未授权');
+            const response = await fetch('/api/domains/status', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authData.token}` }, body: JSON.stringify({ domain, status }) });
+            const result = await response.json() as ApiResponse<DomainData>;
+            if (result.status === 200 && result.data) return result.data;
+            throw new Error(result.message || '更新失败');
+        };
+        const updatedDomains = await Promise.all(domains.value.map(async (domain) => {
+            const status = await checkDomainStatus(domain.domain);
+            return await updateDomainStatus(domain.domain, status);
+        }));
         domains.value = updatedDomains;
         ElMessage.success('状态刷新完成');
     } catch (error: unknown) {
@@ -384,23 +283,13 @@ const loadAlertConfig = async () => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) return;
-
-        const response = await fetch('/api/alertconfig', {
-            headers: { 'Authorization': `Bearer ${authData.token}` }
-        });
-        
+        const response = await fetch('/api/alertconfig', { headers: { 'Authorization': `Bearer ${authData.token}` } });
         const result = await response.json() as ApiResponse<AlertConfig>;
         if (result.status === 200 && result.data) {
             alertConfig.value = result.data;
             alertDays.value = result.data.days;
         }
-    } catch (error) {
-        console.error('获取告警配置失败:', error);
-    }
-};
-
-const handleImport = () => {
-    importVisible.value = true;
+    } catch (error) { console.error('获取告警配置失败:', error); }
 };
 
 const handleExport = async () => {
@@ -408,16 +297,11 @@ const handleExport = async () => {
     try {
         const authData = auth.getAuthToken();
         if (!authData) throw new Error('未登录或登录已过期');
-
-        const response = await fetch('/api/domains/export', {
-            headers: { 'Authorization': `Bearer ${authData.token}` }
-        });
-
+        const response = await fetch('/api/domains/export', { headers: { 'Authorization': `Bearer ${authData.token}` } });
         if (!response.ok) {
             const errorData = await response.json() as { message: string };
             throw new Error(errorData.message || '导出失败');
         }
-
         const filename = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || `domains-export.json`;
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -434,17 +318,15 @@ const handleExport = async () => {
     }
 };
 
-
 onMounted(() => {
     checkLoginStatus();
     loadDomains();
     loadAlertConfig();
 });
-
 </script>
 
 <style scoped>
-/* CORRECTED: Simplified background logic for reliability */
+/* --- 1. Background Styling (FIXED) --- */
 .home-container {
     min-height: 100vh;
     box-sizing: border-box;
@@ -453,12 +335,19 @@ onMounted(() => {
     background-position: center center;
     background-attachment: fixed;
     transition: background-image 0.5s ease-in-out;
-    background-image: url('https://wp.upx8.com/api.php?content=%E5%8A%A8%E6%BC%AB');
 }
-.home-container.dark-mode {
+/* Fallback color + background image for light mode */
+.home-container.light {
+    background-color: #f0f2f5;
+    background-image: url('https://images.unsplash.com/photo-1489549132488-d00b7d881cb6');
+}
+/* Fallback color + background image for dark mode */
+.home-container.dark {
+    background-color: #141414;
     background-image: url('https://images.unsplash.com/photo-1533119428433-b27b858f523a');
 }
 
+/* --- 2. Panel Styling --- */
 .header, .custom-table, .footer {
     position: relative;
     z-index: 10;
@@ -466,113 +355,81 @@ onMounted(() => {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     margin-bottom: 20px;
     transition: background-color 0.3s, backdrop-filter 0.3s;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
-
-.panel-style-misty .header, 
-.panel-style-misty .custom-table, 
-.panel-style-misty .footer {
-    background-color: rgba(255, 255, 255, 0.45); 
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+/* Misty Style */
+.panel-style-misty .header, .panel-style-misty .custom-table, .panel-style-misty .footer {
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
 }
-.dark-mode.panel-style-misty .header,
-.dark-mode.panel-style-misty .custom-table,
-.dark-mode.panel-style-misty .footer {
-    background-color: rgba(0, 0, 0, 0.6);
+.light .panel-style-misty .header, .light .panel-style-misty .custom-table, .light .panel-style-misty .footer {
+    background-color: rgba(255, 255, 255, 0.6);
 }
-
-.panel-style-solid .header,
-.panel-style-solid .custom-table,
-.panel-style-solid .footer {
+.dark .panel-style-misty .header, .dark .panel-style-misty .custom-table, .dark .panel-style-misty .footer {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+/* Solid Style */
+.panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer {
     backdrop-filter: none;
+}
+.light .panel-style-solid .header, .light .panel-style-solid .custom-table, .light .panel-style-solid .footer {
     background-color: #ffffff;
 }
-.dark-mode.panel-style-solid .header,
-.dark-mode.panel-style-solid .custom-table,
-.dark-mode.panel-style-solid .footer {
-    background-color: #2c2c2c;
+.dark .panel-style-solid .header, .dark .panel-style-solid .custom-table, .dark .panel-style-solid .footer {
+    background-color: #212121;
 }
 
-.header {
-    display: flex; flex-wrap: wrap; gap: 15px;
-    align-items: center; justify-content: space-between; padding: 5px 20px;
-}
-.header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-
-:deep(.el-table),
-:deep(.el-table__expanded-cell) {
+/* --- 3. Table Text Color (FIXED) --- */
+:deep(.el-table), :deep(.el-table__expanded-cell) {
     background-color: transparent !important;
 }
-
-/* Base text color for Misty panels */
-:deep(.el-table th),
-:deep(.el-table tr),
-:deep(.el-table td) {
+/* Base styles for all table cells */
+:deep(.el-table th), :deep(.el-table tr), :deep(.el-table td) {
     background-color: transparent !important;
-    border-color: rgba(0, 0, 0, 0.2) !important;
-    color: #303133 !important; /* Default to dark text for light misty panel */
     text-shadow: none;
 }
-.dark-mode :deep(.el-table th),
-.dark-mode :deep(.el-table tr),
-.dark-mode :deep(.el-table td) {
-    color: #E5EAF3 !important; /* Light text for dark panels */
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    text-shadow: 0 0 3px #000;
-}
-
-/* Text color for Solid panels */
-.panel-style-solid :deep(.el-table td),
-.panel-style-solid :deep(.el-table th) {
+/* Light mode text colors */
+.light :deep(.el-table th), .light :deep(.el-table tr), .light :deep(.el-table td) {
     color: #303133 !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
 }
-.dark-mode.panel-style-solid :deep(.el-table td),
-.dark-mode.panel-style-solid :deep(.el-table th) {
+/* Dark mode text colors */
+.dark :deep(.el-table th), .dark :deep(.el-table tr), .dark :deep(.el-table td) {
     color: #E5EAF3 !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
 }
-
+/* Row hover effect */
 :deep(.el-table__row:hover td) {
     background-color: rgba(0, 0, 0, 0.05) !important;
 }
-.dark-mode :deep(.el-table__row:hover td) {
+.dark :deep(.el-table__row:hover td) {
     background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* CORRECTED: Removed all yellow-text styles */
-.warning-text { 
-    color: #E6A23C !important;
-    font-weight: bold;
-}
-.dark-mode .warning-text {
-    color: #ffd54f !important;
-}
+/* --- 4. Other Element Styles --- */
+.header { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 5px 20px; }
+.header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
+/* Status and Link colors */
 .link { color: var(--el-color-primary); text-decoration: none; font-weight: bold; }
 .link:hover { opacity: 0.8; }
+.warning-text { color: #E6A23C !important; font-weight: bold; }
+.dark .warning-text { color: #ffd54f !important; }
 .success-text { color: #67C23A; font-weight: bold; }
+.dark .success-text { color: #a5d6a7; }
 .danger-text { color: #F56C6C; font-weight: bold; }
-.dark-mode .success-text { color: #a5d6a7; }
-.dark-mode .danger-text { color: #ef9a9a; }
+.dark .danger-text { color: #ef9a9a; }
 
-.footer {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    padding: 10px; margin: 0; border-radius: 0;
-    color: #303133;
-    text-shadow: none;
-}
-.dark-mode .footer {
-    color: #E5EAF3;
-    text-shadow: 0 0 3px #000;
-}
+/* Footer */
+.footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 10px; margin: 0; border-radius: 0; }
+.light .footer { color: #303133; }
+.dark .footer { color: #E5EAF3; }
+.footer-content { display: flex; justify-content: center; }
 
+/* Settings Drawer */
 .settings-container { padding: 0 10px; }
 .settings-group { display: flex; justify-content: center; width: 100%; margin-top: 10px; }
 .color-picker { display: flex; justify-content: space-evenly; padding: 10px 0; }
-.color-swatch {
-    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
-    border: 2px solid transparent; transition: transform 0.2s, border-color 0.2s;
-}
+.color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
 .color-swatch:hover { transform: scale(1.1); }
 .color-swatch.active { border-color: var(--el-color-primary); transform: scale(1.2); }
 </style>
