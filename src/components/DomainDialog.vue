@@ -44,6 +44,13 @@
           <el-option label="其他" value="其他" />
         </el-select>
       </el-form-item>
+      <!-- 修正：恢复了 TG 通知和状态通知的开关 -->
+      <el-form-item label="TG通知" prop="tgsend">
+        <el-switch v-model="formData.tgsend" />
+      </el-form-item>
+      <el-form-item label="状态通知" prop="st_tgsend">
+        <el-switch v-model="formData.st_tgsend" />
+      </el-form-item>
       <el-form-item label="备注" prop="memo">
         <el-input v-model="formData.memo" type="textarea" placeholder="请输入备注" />
       </el-form-item>
@@ -71,6 +78,7 @@ const props = defineProps<{
 const emit = defineEmits(['update:visible', 'submit']);
 
 const formRef = ref<FormInstance>();
+// 修正：在 initialFormData 中补全了 tgsend 和 st_tgsend 字段
 const initialFormData: Omit<DomainData, 'id' | 'created_at'> = {
   domain: '',
   registrar: '',
@@ -79,7 +87,9 @@ const initialFormData: Omit<DomainData, 'id' | 'created_at'> = {
   expiry_date: '',
   service_type: '',
   status: '在线',
-  memo: ''
+  memo: '',
+  tgsend: false,
+  st_tgsend: false
 };
 const formData = ref({ ...initialFormData });
 
@@ -100,6 +110,7 @@ watch(() => props.visible, (newVal) => {
       formData.value = { ...initialFormData };
     }
   } else {
+    // 关闭时重置表单验证状态
     formRef.value?.resetFields();
   }
 });
@@ -123,10 +134,8 @@ const handleSubmit = async () => {
 
 <style scoped>
 /*
- * 关键修正：移除所有写死的背景色和文字颜色
+ * 关键修正：移除所有写死的颜色和背景
  * 让对话框的样式完全由全局主题 (html.light/dark) 控制
- * Element Plus 的 el-dialog 组件会自动适配全局主题，
- * 我们只需要确保组件内部没有写死的颜色来覆盖它。
 */
 .domain-dialog {
   /* 这里不需要任何颜色相关的样式 */
