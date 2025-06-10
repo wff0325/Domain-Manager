@@ -357,7 +357,6 @@ onMounted(() => {
 
 <style> /* 全局样式 */
 :root {
-  /* 定义颜色变量 */
   --text-color-primary: #303133;
   --text-color-secondary: #606266;
   --border-color: #dcdfe6;
@@ -378,9 +377,8 @@ html.dark {
     --el-bg-color: var(--panel-bg-solid) !important;
 }
 html.dark .el-dialog, html.dark .el-drawer {
-    --el-bg-color: #1e293b !important; /* 使用一个特定的深色作为弹窗背景 */
+    --el-bg-color: #1e293b !important; 
 }
-
 #live2d-widget { z-index: 1 !important; pointer-events: none !important; }
 .neon-title { font-family: 'ZCOOL KuaiLe', cursive; font-weight: normal; font-size: 2.2rem; position: relative; background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000); background-size: 400% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradientFlow 5s linear infinite; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); }
 @keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
@@ -398,20 +396,19 @@ html.dark .el-dialog, html.dark .el-drawer {
 .panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer { backdrop-filter: none; background-color: var(--panel-bg-solid); }
 
 /* --- 表格文字颜色 (已修正) --- */
-/* 修正：增加一个 .theme-text 类来统一控制非链接文本的颜色 */
 .theme-text { color: var(--text-color-primary); }
 :deep(.el-table) { background-color: transparent !important; }
 :deep(.el-table th), :deep(.el-table td) { border-color: var(--border-color) !important; background-color: transparent !important; transition: all 0.3s ease-in-out; }
-:deep(.el-table th .cell) { color: var(--text-color-secondary) !important; text-shadow: none !important; } /* 表头用次要颜色 */
-:deep(.el-table td .cell) { text-shadow: none !important; } /* 确保普通单元格继承 .theme-text 或其他颜色类 */
+:deep(.el-table th .cell) { color: var(--text-color-secondary) !important; text-shadow: none !important; }
+:deep(.el-table td .cell) { text-shadow: none !important; }
 html.light :deep(.el-table__row:hover td) { background-color: rgba(0, 0, 0, 0.04) !important; }
 html.dark :deep(.el-table__row:hover td) { background-color: rgba(255, 255, 255, 0.06) !important; }
 
 /* --- 其他元素 --- */
 .header { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; padding: 10px 20px; }
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.link { color: var(--text-color-primary); text-decoration: none; font-weight: 500; } /* 链接颜色使用主要文字颜色 */
-.link:hover { opacity: 0.8; }
+.link { color: var(--text-color-primary); text-decoration: none; font-weight: 500; }
+.link:hover { color: var(--el-color-primary); }
 .warning-text { color: #e67e22 !important; font-weight: 500; }
 html.dark .warning-text { color: #f39c12 !important; }
 .success-text { color: #27ae60; font-weight: 500; }
