@@ -86,12 +86,10 @@
                     <el-radio-button label="dark">深色</el-radio-button>
                     <el-radio-button label="system">跟随系统</el-radio-button>
                 </el-radio-group>
-
                 <el-divider>主题颜色</el-divider>
                 <div class="color-picker">
                     <div v-for="color in accentColors" :key="color" class="color-swatch" :style="{ backgroundColor: color }" :class="{ active: accentColor === color }" @click="setAccentColor(color)"></div>
                 </div>
-
                 <el-divider>面板样式</el-divider>
                  <el-radio-group v-model="panelStyle" class="settings-group">
                     <el-radio-button label="misty">Misty</el-radio-button>
@@ -99,8 +97,6 @@
                 </el-radio-group>
             </div>
         </el-drawer>
-
-        <!-- 修正：恢复了完整的页脚内容 -->
         <footer class="footer">
             <div class="footer-content">
                 <div class="copyright">
@@ -109,19 +105,11 @@
                     <span>作者：大疯子</span>
                     <span class="separator">|</span>
                     <div class="social-links">
-                        <a href="https://github.com/wff0325/Domain-Manager/tree/main" target="_blank"
-                            class="social-link" title="访问 GitHub 仓库">
-                            <el-icon class="social-icon"><svg viewBox="0 0 1024 1024" width="20" height="20">
-                                    <path fill="currentColor"
-                                        d="M512 0C229.12 0 0 229.12 0 512c0 226.56 146.56 417.92 350.08 485.76 25.6 4.48 35.2-10.88 35.2-24.32 0-12.16-0.64-52.48-0.64-95.36-128.64 23.68-161.92-31.36-172.16-60.16-5.76-14.72-30.72-60.16-52.48-72.32-17.92-9.6-43.52-33.28-0.64-33.92 40.32-0.64 69.12 37.12 78.72 52.48 46.08 77.44 119.68 55.68 149.12 42.24 4.48-33.28 17.92-55.68 32.64-68.48-113.92-12.8-232.96-56.96-232.96-252.8 0-55.68 19.84-101.76 52.48-137.6-5.12-12.8-23.04-65.28 5.12-135.68 0 0 42.88-13.44 140.8 52.48 40.96-11.52 84.48-17.28 128-17.28 43.52 0 87.04 5.76 128 17.28 97.92-66.56 140.8-52.48 140.8-52.48 28.16 70.4 10.24 122.88 5.12 135.68 32.64 35.84 52.48 81.28 52.48 137.6 0 196.48-119.68 240-233.6 252.8 18.56 16 34.56 46.72 34.56 94.72 0 68.48-0.64 123.52-0.64 140.8 0 13.44 9.6 29.44 35.2 24.32C877.44 929.92 1024 737.92 1024 512 1024 229.12 794.88 0 512 0z" />
-                                </svg></el-icon>
+                        <a href="https://github.com/wff0325/Domain-Manager/tree/main" target="_blank" class="social-link" title="访问 GitHub 仓库">
+                            <el-icon class="social-icon"><svg viewBox="0 0 1024 1024" width="20" height="20"><path fill="currentColor" d="M512 0C229.12 0 0 229.12 0 512c0 226.56 146.56 417.92 350.08 485.76 25.6 4.48 35.2-10.88 35.2-24.32 0-12.16-0.64-52.48-0.64-95.36-128.64 23.68-161.92-31.36-172.16-60.16-5.76-14.72-30.72-60.16-52.48-72.32-17.92-9.6-43.52-33.28-0.64-33.92 40.32-0.64 69.12 37.12 78.72 52.48 46.08 77.44 119.68 55.68 149.12 42.24 4.48-33.28 17.92-55.68 32.64-68.48-113.92-12.8-232.96-56.96-232.96-252.8 0-55.68 19.84-101.76 52.48-137.6-5.12-12.8-23.04-65.28 5.12-135.68 0 0 42.88-13.44 140.8 52.48 40.96-11.52 84.48-17.28 128-17.28 43.52 0 87.04 5.76 128 17.28 97.92-66.56 140.8-52.48 140.8-52.48 28.16 70.4 10.24 122.88 5.12 135.68 32.64 35.84 52.48 81.28 52.48 137.6 0 196.48-119.68 240-233.6 252.8 18.56 16 34.56 46.72 34.56 94.72 0 68.48-0.64 123.52-0.64 140.8 0 13.44 9.6 29.44 35.2 24.32C877.44 929.92 1024 737.92 1024 512 1024 229.12 794.88 0 512 0z" /></svg></el-icon>
                         </a>
-                        <a href="https://www.youtube.com/" target="_blank" class="social-link"
-                            title="访问 YouTube 频道">
-                            <el-icon class="social-icon"><svg viewBox="0 0 1024 1024" width="20" height="20">
-                                    <path fill="currentColor"
-                                        d="M941.3 296.1c-10.3-38.6-40.7-69-79.3-79.3C792.2 198 512 198 512 198s-280.2 0-350 18.7c-38.6 10.3-69 40.7-79.3 79.3C64 365.9 64 512 64 512s0 146.1 18.7 215.9c10.3 38.6 40.7 69 79.3 79.3C231.8 826 512 826 512 826s280.2 0 350-18.7c38.6-10.3 69-40.7 79.3-79.3C960 658.1 960 512 960 512s0-146.1-18.7-215.9zM423 646V378l232 134-232 134z" />
-                                </svg></el-icon>
+                        <a href="https://www.youtube.com/" target="_blank" class="social-link" title="访问 YouTube 频道">
+                            <el-icon class="social-icon"><svg viewBox="0 0 1024 1024" width="20" height="20"><path fill="currentColor" d="M941.3 296.1c-10.3-38.6-40.7-69-79.3-79.3C792.2 198 512 198 512 198s-280.2 0-350 18.7c-38.6 10.3-69 40.7-79.3 79.3C64 365.9 64 512 64 512s0 146.1 18.7 215.9c10.3 38.6 40.7 69 79.3 79.3C231.8 826 512 826 512 826s280.2 0 350-18.7c38.6-10.3 69-40.7 79.3-79.3C960 658.1 960 512 960 512s0-146.1-18.7-215.9zM423 646V378l232 134-232 134z" /></svg></el-icon>
                         </a>
                     </div>
                 </div>
@@ -350,39 +338,35 @@ onMounted(() => {
 </script>
 
 <style> /* 全局样式 */
+/* --- CSS 变量定义 --- */
+:root {
+  --text-color-primary: #2c3e50;
+  --text-color-secondary: #8492a6;
+  --border-color: #e4e7ed;
+  --panel-bg-color-solid: #ffffff;
+  --panel-bg-color-misty: rgba(255, 255, 255, 0.8);
+  --panel-border-color: rgba(228, 231, 237, 0.7);
+}
+html.dark {
+  --text-color-primary: #e5eaf3;
+  --text-color-secondary: #a8abb2;
+  --border-color: #4c4d4f;
+  --panel-bg-color-solid: #141414;
+  --panel-bg-color-misty: rgba(20, 20, 20, 0.75);
+  --panel-border-color: rgba(80, 80, 80, 0.5);
+}
+
+/* --- Element Plus 全局覆盖 --- */
+/* (这部分保持不变，用于确保弹窗等组件能响应主题) */
+.el-dialog, .el-drawer, .el-picker-panel, .el-select-dropdown {
+    --el-bg-color: var(--panel-bg-color-solid) !important;
+}
+html.dark .el-dialog, html.dark .el-drawer { --el-bg-color: #1e293b !important; }
+
 /* --- 宠物模型和霓虹标题 --- */
 #live2d-widget { z-index: 1 !important; pointer-events: none !important; }
 .neon-title { font-family: 'ZCOOL KuaiLe', cursive; font-weight: normal; font-size: 2.2rem; position: relative; background: linear-gradient(90deg, #ff0000, #ff9900, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000); background-size: 400% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradientFlow 5s linear infinite; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); }
 @keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-/* --- 修正：全局主题文字颜色变量 --- */
-:root {
-  --text-color-primary: #31353a;
-  --text-color-secondary: #4b5563;
-  --border-color: #e0e0e0;
-}
-html.dark {
-  --text-color-primary: #f0f2f5;
-  --text-color-secondary: #9ca3af;
-  --border-color: #404a58;
-}
-
-/* --- 修正：全局Element Plus组件覆盖 --- */
-html.dark .el-dialog, html.dark .el-drawer, html.dark .el-picker-panel, html.dark .el-select-dropdown {
-    --el-bg-color: #1e293b !important;
-    --el-border-color: #334155 !important;
-}
-html.dark .el-dialog__title { color: var(--text-color-primary) !important; }
-html.dark .el-form-item__label { color: var(--text-color-secondary) !important; }
-html.dark .el-input__inner, html.dark .el-textarea__inner {
-    color: var(--text-color-primary) !important;
-    background-color: #374151 !important;
-    border-color: #4b5563 !important;
-}
-html.dark .el-select-dropdown__item { color: var(--text-color-secondary) !important; }
-html.dark .el-select-dropdown__item.hover, html.dark .el-select-dropdown__item:hover { background-color: #374151 !important; }
-html.dark .el-select-dropdown__item.selected { color: var(--el-color-primary) !important; background-color: rgba(var(--el-color-primary-rgb), 0.1) !important;}
-/* ... 更多 EP 组件的深色模式覆盖 ... */
 </style>
 
 <style scoped>
@@ -391,25 +375,15 @@ html.dark .el-select-dropdown__item.selected { color: var(--el-color-primary) !i
 .home-container.light { background-color: #e0eafc; background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
 .home-container.dark { background-color: #0d1b2a; background-image: url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
 
-/* --- 面板样式 --- */
-.header, .custom-table, .footer { position: relative; z-index: 10; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); margin-bottom: 20px; transition: all 0.3s ease-in-out; border: 1px solid transparent; }
+/* --- 面板样式 (已修正) --- */
+.header, .custom-table, .footer { position: relative; z-index: 10; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); margin-bottom: 20px; transition: all 0.3s ease-in-out; border: 1px solid var(--panel-border-color); }
+.panel-style-misty .header, .panel-style-misty .custom-table, .panel-style-misty .footer { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); background-color: var(--panel-bg-color-misty); }
+.panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer { backdrop-filter: none; background-color: var(--panel-bg-color-solid); }
 
-/* Misty 面板 */
-.panel-style-misty .header, .panel-style-misty .custom-table, .panel-style-misty .footer { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-.home-container.light .panel-style-misty .header, .home-container.light .panel-style-misty .custom-table, .home-container.light .panel-style-misty .footer { background-color: rgba(255, 255, 255, 0.75); border-color: rgba(200, 200, 200, 0.4); }
-.home-container.dark .panel-style-misty .header, .home-container.dark .panel-style-misty .custom-table, .home-container.dark .panel-style-misty .footer { background-color: rgba(25, 35, 45, 0.7); border-color: rgba(100, 100, 120, 0.5); }
-
-/* Solid 面板 */
-.panel-style-solid .header, .panel-style-solid .custom-table, .panel-style-solid .footer { backdrop-filter: none; }
-.home-container.light .panel-style-solid .header, .home-container.light .panel-style-solid .custom-table, .home-container.light .panel-style-solid .footer { background-color: #ffffff; border-color: #d0d5dd; }
-.home-container.dark .panel-style-solid .header, .home-container.dark .panel-style-solid .custom-table, .home-container.dark .panel-style-solid .footer { background-color: #1e293b; border-color: #334155; }
-
-/* --- 表格文字颜色 (最终修正方案) --- */
-:deep(.el-table), :deep(.el-table__expanded-cell) { background-color: transparent !important; }
-:deep(.el-table th), :deep(.el-table tr), :deep(.el-table td) { background-color: transparent !important; text-shadow: none !important; transition: all 0.3s ease-in-out; }
-/* 使用 CSS 变量来设置文字和边框颜色 */
-:deep(.el-table th .cell), :deep(.el-table td .cell) { color: var(--text-color-primary) !important; }
-:deep(.el-table th), :deep(.el-table td) { border-color: var(--border-color) !important; }
+/* --- 表格文字颜色 (已修正) --- */
+:deep(.el-table) { background-color: transparent !important; }
+:deep(.el-table th .cell), :deep(.el-table td .cell) { color: var(--text-color-primary) !important; text-shadow: none !important; }
+:deep(.el-table th), :deep(.el-table td) { border-color: var(--border-color) !important; background-color: transparent !important; transition: all 0.3s ease-in-out; }
 html.light :deep(.el-table__row:hover td) { background-color: rgba(0, 0, 0, 0.04) !important; }
 html.dark :deep(.el-table__row:hover td) { background-color: rgba(255, 255, 255, 0.06) !important; }
 
@@ -418,28 +392,22 @@ html.dark :deep(.el-table__row:hover td) { background-color: rgba(255, 255, 255,
 .header-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .link { color: var(--el-color-primary); text-decoration: none; font-weight: 500; }
 .link:hover { opacity: 0.8; }
-html.light .warning-text { color: #e67e22 !important; font-weight: 500; }
-html.dark .warning-text { color: #f39c12 !important; font-weight: 500; }
-html.light .success-text { color: #27ae60; font-weight: 500; }
-html.dark .success-text { color: #2ecc71; font-weight: 500; }
-html.light .danger-text { color: #c0392b; font-weight: 500; }
-html.dark .danger-text { color: #e74c3c; font-weight: 500; }
+.warning-text { color: #e67e22 !important; font-weight: 500; }
+html.dark .warning-text { color: #f39c12 !important; }
+.success-text { color: #27ae60; font-weight: 500; }
+html.dark .success-text { color: #2ecc71; }
+.danger-text { color: #c0392b; font-weight: 500; }
+html.dark .danger-text { color: #e74c3c; }
 
-/* --- 页脚 --- */
-.footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px; margin: 0; border-radius: 0; }
+/* --- 页脚 (已修正) --- */
+.footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px; margin: 0; border-radius: 0; color: var(--text-color-secondary); }
 .footer-content { max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; text-align: center; }
 .copyright { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; font-size: 14px; }
-.separator { color: #dcdfe6; margin: 0 2px; }
+.separator { margin: 0 2px; color: var(--border-color); }
 .social-links { display: flex; gap: 15px; align-items: center; }
-.social-link { color: #eee; transition: all 0.3s ease; }
-.social-link:hover { color: #90caf9; transform: translateY(-2px); }
+.social-link { color: var(--text-color-secondary); transition: all 0.3s ease; }
+.social-link:hover { color: var(--text-color-primary); transform: translateY(-2px); }
 .social-icon { width: 20px; height: 20px; }
-/* 修正页脚文字颜色 */
-html.light .footer { color: #495057; }
-html.dark .footer { color: #adb5bd; }
-html.dark .footer .social-link { color: #adb5bd; }
-html.dark .footer .social-link:hover { color: #e5e7eb; }
-html.dark .footer .separator { color: #4b5563; }
 
 /* --- 设置抽屉 --- */
 .settings-container { padding: 0 15px; }
@@ -448,5 +416,4 @@ html.dark .footer .separator { color: #4b5563; }
 .color-swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
 .color-swatch:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 .color-swatch.active { border-color: var(--el-color-primary); transform: translateY(-1px) scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
 </style>
