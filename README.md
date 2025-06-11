@@ -1,4 +1,4 @@
-![Domain-Manager](https://look.pics.cloudns.ch/img/cover2.png)
+![Domain-Manager]()
 
 <div align="center">
 
