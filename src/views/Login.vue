@@ -3,7 +3,7 @@
         <el-card class="login-card">
             <div class="logo-container">
                 <img src="../../public/vite.svg" alt="Logo" class="logo" />
-                <h2>域名管理系统<br />(Domains-Support)</h2>
+                <h2>域名管理系统<br />(Domain-Manager)</h2>
             </div>
             <el-form :model="loginForm" @submit.prevent="handleLogin" label-position="top">
                 <el-form-item label="用户名">
