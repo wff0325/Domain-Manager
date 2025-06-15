@@ -178,6 +178,9 @@
 
 欢迎提交 Issue 和 Pull Request！
 
+## 星
+[![Stargazers over time](https://starchart.cc/xxss0903/drawstamputils.svg?variant=adaptive)](https://starchart.cc/wff0325/Domain-Manager)
+
 ## 许可证
 
 本项目基于 MIT 许可证开源 - 查看 [LICENSE](LICENSE) 文件了解更多详情。
