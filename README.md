@@ -179,7 +179,7 @@
 欢迎提交 Issue 和 Pull Request！
 
 ## 星
-[![Stargazers over time](https://starchart.cc/xxss0903/drawstamputils.svg?variant=adaptive)](https://starchart.cc/wff0325/Domain-Manager)
+[![Stargazers over time](https://starchart.cc/wff0325/Domain-Manager.svg?variant=adaptive)](https://starchart.cc/wff0325/Domain-Manager)
 
 ## 许可证
 
