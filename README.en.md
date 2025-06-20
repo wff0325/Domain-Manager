@@ -55,6 +55,7 @@ During import, the system will automatically validate the data format and provid
 - A GitHub account
 - A Cloudflare account
 ### Installation Steps
+
 1.Fork this repository to your GitHub account.
 
 2.Create a new project in Cloudflare Pages
@@ -68,7 +69,7 @@ During import, the system will automatically validate the data format and provid
 - Build command: `npm run build`
 - Build output directory:`dist`
 - Environment variables:
- ```
+     ```
      USER=your_username
      PASS=your_password
      API_TOKEN=your_api_token
