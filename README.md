@@ -1,14 +1,13 @@
-[English](./README.en.md)
-
----
-
 ![ChatGPT Image 2025年6月11日 09_29_12](https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9)
+
 
 <div align="center">
 
 # Domains-Manager
 
 </div>
+
+
 
 一个基于 Cloudflare Pages 的域名管理系统，帮助您轻松管理和监控多个域名的状态、到期时间等信息。
 
@@ -47,6 +46,8 @@
     "memo": "API文档站点"
   }
 ]
+```
+
 ### 导入字段说明
 
 - `domain`：域名（必填）
@@ -176,3 +177,10 @@
 ## 贡献指南
 
 欢迎提交 Issue 和 Pull Request！
+
+## 星
+[![Stargazers over time](https://starchart.cc/wff0325/Domain-Manager.svg?variant=adaptive)](https://starchart.cc/wff0325/Domain-Manager)
+
+## 许可证
+
+本项目基于 MIT 许可证开源 - 查看 [LICENSE](LICENSE) 文件了解更多详情。
