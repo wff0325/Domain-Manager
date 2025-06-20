@@ -66,7 +66,7 @@ During import, the system will automatically validate the data format and provid
 - Build command: `npm run build`
 - Build output directory:`dist`
 - Environment variables:
-Generated code
+  
  ```
      USER=your_username
      PASS=your_password
