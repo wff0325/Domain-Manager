@@ -56,17 +56,18 @@ During import, the system will automatically validate the data format and provid
 - A Cloudflare account
 ### Installation Steps
 1.Fork this repository to your GitHub account.
+
 2.Create a new project in Cloudflare Pages
 - Log in to the Cloudflare Dashboard.
 - Go to the Pages section.
 - Click "Create a project".
 - Select "Connect to Git".
 - Choose the repository you forked.
+- 
 3.Configure build settings
 - Build command: `npm run build`
 - Build output directory:`dist`
 - Environment variables:
-  
  ```
      USER=your_username
      PASS=your_password
@@ -76,14 +77,17 @@ During import, the system will automatically validate the data format and provid
 - In the Cloudflare Dashboard, go to the D1 section.
 - Create a new database, and name it`domains-db`
 - Copy the Database ID.
+
 5.Configure the Database
 - In your Cloudflare Pages project settings, add a D1 database binding.
 - Binding name:`DB`
 - Database ID: Paste the ID you copied earlier.
+
 6.Initialize the Database
 - In the Cloudflare Dashboard, go to the D1 section.
 - Select your database.
 - Execute the SQL statements from the`schema.sql` file.
+
 7.Deploy
 - Click "Save and Deploy".
 - Wait for the deployment to complete.
