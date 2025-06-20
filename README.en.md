@@ -16,7 +16,7 @@ A domain management system built on Cloudflare Pages, designed to help you easil
 - Secure Authentication: Access control based on username and password.
 ## Batch Import Instructions
 The system supports batch importing of domain data via a JSON file. The import format is as follows:
-```
+```json
 [
   {
     "domain": "example.com",
