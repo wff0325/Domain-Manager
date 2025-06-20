@@ -3,7 +3,9 @@
 ---
 ![alt text](https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9)
 <div align="center">
+  
 # Domains-Manager
+
 </div>
 
 
