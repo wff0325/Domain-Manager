@@ -73,6 +73,7 @@ During import, the system will automatically validate the data format and provid
      PASS=your_password
      API_TOKEN=your_api_token
      ```
+
 4.Create a D1 Database
 - In the Cloudflare Dashboard, go to the D1 section.
 - Create a new database, and name it`domains-db`
