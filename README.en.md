@@ -1,89 +1,149 @@
 [中文 (Chinese)](./README.md)
 
 ---
-
-### Domain-Manager
-
-#### Introduction
-A simple platform for managing domains and SSL certificates.
-
-<!-- Paste your project preview images here -->
-<!-- Example: ![Project Preview](https://example.com/your-image.png) -->
-
-#### Feature List
-1.  **Domain Management**
-    - [x] Domain List
-    - [x] Add Domain
-    - [x] Delete Domain
-    - [x] Sync Domains (Supports Cloudflare/Dnspod)
-    - [x] DNS Record Management
-    - [x] Add Record
-    - [x] Delete Record
-    - [x] Modify Record
-    - [x] Domain Certificate Management
-    - [x] Apply for Certificate
-    - [x] Renew Certificate
-    - [x] Auto-Renew Certificate
-    - [x] Download Certificate
-    - [x] Delete Certificate
-    - [x] Push Certificate to other servers
-    - [x] Domain Monitoring
-2.  **Certificate Management**
-    - [x] Certificate List
-    - [x] Add Certificate
-    - [x] Delete Certificate
-    - [x] Monitor Certificate
-    - [x] Push Certificate to other servers
-3.  **User Management**
-    - [x] User List
-    - [x] Add User
-    - [x] Delete User
-4.  **Notification Channels**
-    - [x] Bark
-    - [x] ServerChan
-    - [x] WeCom
-    - [x] DingTalk
-    - [x] Lark (Feishu)
-
-#### Software Architecture
-- Vue.js
-- Golang
-- Gin
-- Gorm
-- SQLite
-
-#### Installation Guide
-
-1.  Download the latest version of `Domain-Manager`.
-2.  Unzip the `Domain-Manager` package.
-3.  Run `Domain-Manager`:
-    - `./Domain-Manager -c config.yaml`
-4.  Access `Domain-Manager`:
-    - `http://127.0.0.1:8080`
-5.  Default username and password:
-    - `admin` / `admin`
-
-#### Usage Instructions
-1.  **Add a Domain Provider**
-    - Supports `Cloudflare` and `Dnspod`.
-    - `Cloudflare` requires an `API Token`.
-    - `Dnspod` requires an `ID` and `Token`.
-2.  **Add a Domain**
-    - Manually add.
-    - Sync from a provider.
-3.  **Add DNS Records**
-    - Manually add.
-4.  **Apply for a Certificate**
-    - Supports `Let's Encrypt` and `ZeroSSL`.
-    - Challenge types: `HTTP-01` and `DNS-01`.
-    - The `DNS-01` challenge requires support from your domain provider.
-5.  **Push a Certificate**
-    - Supports `SSH`.
-    - Push certificates to other remote servers.
-
-#### How to Contribute
-
-1.  Fork this repository.
-2.  Create a new branch (e.g., `feat_xxx`).
-3.  Commit your changes.
-4.  Create a new Pull Request.
+![alt text](https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9)
+<div align="center">
+Domains-Manager
+</div>
+A domain management system built on Cloudflare Pages, designed to help you easily manage and monitor the status, expiration dates, and other information for your domains.
+Features
+Domain Management: Add, edit, delete, import, and export domain information.
+Status Monitoring: Automatically checks the online status of domains.
+Expiration Reminders: Set reminder periods for domain expiration.
+Multi-Registrar Support: Supports recording information for multiple domain registrars.
+Telegram Notifications: Supports sending expiration reminders via Telegram.
+Responsive Design: Accessible on both mobile and desktop devices.
+Secure Authentication: Access control based on username and password.
+Batch Import Instructions
+The system supports batch importing of domain data via a JSON file. The import format is as follows:
+Generated json
+[
+  {
+    "domain": "example.com",
+    "registrar": "Cloudflare",
+    "registrar_link": "https://dash.cloudflare.com",
+    "registrar_date": "2023-01-01",
+    "expiry_date": "2024-01-01",
+    "service_type": "Website",
+    "memo": "Main site"
+  },
+  {
+    "domain": "example.org",
+    "registrar": "Namecheap",
+    "registrar_link": "https://www.namecheap.com",
+    "registrar_date": "2023-02-15",
+    "expiry_date": "2024-02-15",
+    "service_type": "API Service",
+    "memo": "API documentation site"
+  }
+]
+Use code with caution.
+Json
+Import Field Descriptions
+domain: The domain name (required)
+registrar: The name of the registrar
+registrar_link: The management link for the registrar
+registrar_date: Registration date, format YYYY-MM-DD
+expiry_date: Expiration date, format YYYY-MM-DD
+service_type: The type of service
+memo: Additional notes or memo
+During import, the system will automatically validate the data format and provide detailed information on successful and failed entries.
+Quick Start
+Prerequisites
+A GitHub account
+A Cloudflare account
+Installation Steps
+Fork this repository to your GitHub account.
+Create a new project in Cloudflare Pages
+Log in to the Cloudflare Dashboard.
+Go to the Pages section.
+Click "Create a project".
+Select "Connect to Git".
+Choose the repository you forked.
+Configure build settings
+Build command: npm run build
+Build output directory: dist
+Environment variables:
+Generated code
+USER=your_username
+PASS=your_password
+API_TOKEN=your_api_token
+Use code with caution.
+Create a D1 Database
+In the Cloudflare Dashboard, go to the D1 section.
+Create a new database, and name it domains-db.
+Copy the Database ID.
+Configure the Database
+In your Cloudflare Pages project settings, add a D1 database binding.
+Binding name: DB
+Database ID: Paste the ID you copied earlier.
+Initialize the Database
+In the Cloudflare Dashboard, go to the D1 section.
+Select your database.
+Execute the SQL statements from the schema.sql file.
+Deploy
+Click "Save and Deploy".
+Wait for the deployment to complete.
+After deployment is complete, you can access the system via the domain provided by Cloudflare Pages.
+API Documentation
+1. Domain Check API
+Endpoint: /api/check
+Method: GET or POST
+Authentication: Requires an API Token (via URL parameter or Bearer Token).
+Authentication methods (choose one):
+URL Parameter: /api/check?token=your_token
+Bearer Token: Authorization: Bearer your_token
+Response:
+Generated json
+{
+    "status": 200,
+    "message": "Check complete",
+    "data": {
+        "total_domains": 10,
+        "notified_domains": [
+            {
+                "domain": "example.com",
+                "remainingDays": 15,
+                "expiry_date": "2024-03-01"
+            }
+        ]
+    }
+}
+Use code with caution.
+Json
+2. Domain List API
+Endpoint: /api/addrec
+Method: POST
+Authentication: Requires a Bearer Token.
+Response:
+Generated json
+{
+    "status": 200,
+    "message": "Successfully retrieved",
+    "data": [
+        {
+            "id": 1,
+            "domain": "example.com",
+            "registrar": "Cloudflare",
+            "registrar_link": "https://cloudflare.com",
+            "registrar_date": "2023-01-01",
+            "expiry_date": "2024-01-01",
+            "service_type": "Website",
+            "status": "Online",
+            "memo": "Main site"
+        }
+    ]
+}
+Use code with caution.
+Json
+Configuration
+Environment Variables
+USER: Administrator username
+PASS: Administrator password
+API_TOKEN: API access token
+Contributing
+Contributions are welcome! Please feel free to submit Issues and Pull Requests.
+Stargazers
+![alt text](https://starchart.cc/wff0325/Domain-Manager.svg?variant=adaptive)
+License
+This project is open-source under the MIT License - see the LICENSE file for more details.
