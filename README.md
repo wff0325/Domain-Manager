@@ -182,7 +182,7 @@
 
 ## 星
 [![Stargazers over time](https://starchart.cc/wff0325/Domain-Manager.svg?variant=adaptive)](https://starchart.cc/wff0325/Domain-Manager)
-
+[![Use EdgeOne Pages to deploy](https://cdnstatic.tencentcs.com/edgeone/pages/deploy.svg)](https://edgeone.ai/pages/new?repository-url=https://console.tencentcloud.com/edgeone/pages/project/pages-3tg9qzxkm2i4/index?name=domain-manager)
 ## 许可证
 
 本项目基于 MIT 许可证开源 - 查看 [LICENSE](LICENSE) 文件了解更多详情。
