@@ -11,7 +11,7 @@
 
 
 
-一个基于 Cloudflare Pages 的域名管理系统，帮助您轻松管理和监控多个域名的状态、到期时间等信息。
+一个基于 Cloudflare Pages/EdgeOne Pages  的域名管理系统，帮助您轻松管理和监控多个域名的状态、到期时间等信息。
 
 ## 功能特点
 
@@ -67,14 +67,14 @@
 ### 前置要求
 
 - GitHub 账号
-- Cloudflare 账号
+- Cloudflare 账号/EdgeOne 账号
 
 ### 安装步骤
 
 1. Fork 本仓库到您的 GitHub 账号
 
-2. 在 Cloudflare Pages 中创建新项目
-   - 登录 Cloudflare Dashboard
+2. 在 Cloudflare Pages/EdgeOne Pages  中创建新项目
+   - 登录 Cloudflare Dashboard/EdgeOne Pages 
    - 进入 Pages 页面
    - 点击 "Create a project"
    - 选择 "Connect to Git"
