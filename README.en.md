@@ -9,7 +9,7 @@
 </div>
 
 
-A domain management system built on Cloudflare Pages, designed to help you easily manage and monitor the status, expiration dates, and other information for your domains.
+A domain management system built on Cloudflare Pages/EdgeOne Pages, designed to help you easily manage and monitor the status, expiration dates, and other information for your domains.
 ## Features
 - Domain Management: Add, edit, delete, import, and export domain information.
 - Status Monitoring: Automatically checks the online status of domains.
@@ -55,12 +55,12 @@ During import, the system will automatically validate the data format and provid
 ## Quick Start
 ### Prerequisites
 - A GitHub account
-- A Cloudflare account
+- A Cloudflare account/EdgeOne
 ### Installation Steps
 
 1.Fork this repository to your GitHub account.
 
-2.Create a new project in Cloudflare Pages
+2.Create a new project in Cloudflare Pages/EdgeOne Pages
 - Log in to the Cloudflare Dashboard.
 - Go to the Pages section.
 - Click "Create a project".
@@ -154,5 +154,8 @@ Response:
 Contributions are welcome! Please feel free to submit Issues and Pull Requests.
 ## Stargazers
 ![alt text](https://starchart.cc/wff0325/Domain-Manager.svg?variant=adaptive)
+
+[![Use EdgeOne Pages to deploy](https://cdnstatic.tencentcs.com/edgeone/pages/deploy.svg)](https://edgeone.ai/pages/new?repository-url=https://console.tencentcloud.com/edgeone/pages/project/pages-3tg9qzxkm2i4/index?name=domain-manager)
+
 ## License
 This project is open-source under the MIT License - see the LICENSE file for more details.
