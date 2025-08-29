@@ -1,8 +1,7 @@
 [English](./README.en.md)
 
-![ChatGPT Image 2025年6月11日 09_29_12](https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9)
 
-<img src="https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9" width="200" height="300">
+<img src="https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9" width="400" height="500">
 
 
 <div align="center">
