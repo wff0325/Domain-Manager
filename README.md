@@ -1,7 +1,7 @@
 [English](./README.en.md)
 
 <p align = "center">    
-<img  src="https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9" width="400" height="500" />
+<img  src="https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9" width="600" height="600" />
 </p>
 
 
