@@ -1,8 +1,9 @@
 [中文 (Chinese)](./README.md)
 
 ---
-![alt text](https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9)
-<div align="center">
+<p align = "center">    
+<img  src="https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9" width="600" height="600" />
+</p>
   
 # Domains-Manager
 
@@ -154,6 +155,14 @@ Response:
 Contributions are welcome! Please feel free to submit Issues and Pull Requests.
 ## Stargazers
 ![alt text](https://starchart.cc/wff0325/Domain-Manager.svg?variant=adaptive)
+
+"CDN acceleration and security protection for this project are sponsored by Tencent EdgeOne: EdgeOne offers a long-term free plan with unlimited traffic and requests, covering Mainland China nodes, with no overage charges. Interested friends can click the link below to claim it"
+
+[Best Asian CDN, Edge, and Secure Solutions - Tencent EdgeOne](https://edgeone.ai/zh?from=github)
+
+<p align = "left">    
+<img  src="https://edgeone.ai/media/34fe3a45-492d-4ea4-ae5d-ea1087ca7b4b.png" width="400" height="500" />
+</p>
 
 [![Use EdgeOne Pages to deploy](https://cdnstatic.tencentcs.com/edgeone/pages/deploy.svg)](https://edgeone.ai/pages/new?repository-url=https://console.tencentcloud.com/edgeone/pages/project/pages-3tg9qzxkm2i4/index?name=domain-manager)
 
