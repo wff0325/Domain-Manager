@@ -3,7 +3,9 @@
 
 <img src="https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9" width="400" height="500">
 
-![Alt](https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9#pic_center =600x600)
+<p align = "center">    
+<img  src="https://github.com/user-attachments/assets/d7509dd3-5254-4af0-ad68-f8cbfdd0bcd9" width="400" height="500" />
+</p>
 
 
 
